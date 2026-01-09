@@ -12,20 +12,21 @@
   "dependencies": {
     "loader-utils": "3.2.1",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-scripts": "5.0.1"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
+    "@types/node": "^25.0.3",
     "@types/react": "18.2.38",
     "@types/react-dom": "18.2.15",
+    "@vitejs/plugin-react": "^5.1.2",
     "gh-pages": "^6.3.0",
-    "typescript": "4.4.4"
+    "typescript": "4.9.5",
+    "vite": "^7.3.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
