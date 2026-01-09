@@ -1900,9 +1900,10 @@ function App() {
           </div>
         </div>
       </div>
-        </div >
 
-      { viewingHistory && (
+
+      {
+      viewingHistory && (
         <div
           className="modal-overlay"
           onClick={() => setViewingHistory(null)}
@@ -1969,429 +1970,429 @@ function App() {
           </div>
         </div>
       )
-  }
+    }
       </div >
     );
-}
+  }
 
-if (gameState === "loading") {
-  return (
-    <div className="app-container">
-      <div className="card loading-card">
-        <h2>Loading...</h2>
-        <div className="loader"></div>
-      </div>
-    </div>
-  );
-}
-
-// Fallback for ready state removal
-if (gameState === "ready") return null;
-
-if (gameState === "playing") {
-  if (!currentElement)
+  if (gameState === "loading") {
     return (
       <div className="app-container">
-        <h1>Loading...</h1>
+        <div className="card loading-card">
+          <h2>Loading...</h2>
+          <div className="loader"></div>
+        </div>
       </div>
     );
-  return (
-    <div className="app-container">
-      {" "}
-      <div className="header-info">
+  }
+
+  // Fallback for ready state removal
+  if (gameState === "ready") return null;
+
+  if (gameState === "playing") {
+    if (!currentElement)
+      return (
+        <div className="app-container">
+          <h1>Loading...</h1>
+        </div>
+      );
+    return (
+      <div className="app-container">
         {" "}
-        <div style={{ textAlign: "left" }}>
-          <span className="total-timer">{currentTimer}s</span>
-          <span className="question-timer"> ({questionTimer}s)</span>
-        </div>{" "}
-        <div className="header-right">
+        <div className="header-info">
           {" "}
-          {playStyle === "infinite" ? (
-            <span
-              className={`question-count ${combo > 1 ? "combo-active" : ""}`}
-            >
-              Score: {score}{" "}
+          <div style={{ textAlign: "left" }}>
+            <span className="total-timer">{currentTimer}s</span>
+            <span className="question-timer"> ({questionTimer}s)</span>
+          </div>{" "}
+          <div className="header-right">
+            {" "}
+            {playStyle === "infinite" ? (
               <span
-                className={`combo-badge ${isComboBreaking ? "combo-break" : ""
-                  }`}
+                className={`question-count ${combo > 1 ? "combo-active" : ""}`}
               >
-                {combo} COMBO!
-              </span>
-            </span>
-          ) : (
-            <div
-              style={{ display: "flex", alignItems: "center", gap: "10px" }}
-            >
-              {combo > 1 && (
+                Score: {score}{" "}
                 <span
-                  className={`combo-badge fade-in ${isComboBreaking ? "combo-break" : ""
+                  className={`combo-badge ${isComboBreaking ? "combo-break" : ""
                     }`}
                 >
                   {combo} COMBO!
                 </span>
-              )}
-              <span className="question-count">
-                残り: {quizQueue.length - currentIndex}問
               </span>
+            ) : (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                {combo > 1 && (
+                  <span
+                    className={`combo-badge fade-in ${isComboBreaking ? "combo-break" : ""
+                      }`}
+                  >
+                    {combo} COMBO!
+                  </span>
+                )}
+                <span className="question-count">
+                  残り: {quizQueue.length - currentIndex}問
+                </span>
+              </div>
+            )}{" "}
+            <button onClick={handleRetireClick} className="retire-text-btn">
+              {playStyle === "infinite" ? "終了する" : "やめる"}
+            </button>{" "}
+          </div>{" "}
+        </div>{" "}
+        <div className="card" style={{ position: "relative" }}>
+          {" "}
+          {scoreFeedback && (
+            <div
+              className={`score-feedback ${scoreFeedback.type === "gain" ? "fb-gain" : "fb-loss"
+                }`}
+            >
+              {scoreFeedback.val}
             </div>
           )}{" "}
-          <button onClick={handleRetireClick} className="retire-text-btn">
-            {playStyle === "infinite" ? "終了する" : "やめる"}
-          </button>{" "}
-        </div>{" "}
-      </div>{" "}
-      <div className="card" style={{ position: "relative" }}>
-        {" "}
-        {scoreFeedback && (
-          <div
-            className={`score-feedback ${scoreFeedback.type === "gain" ? "fb-gain" : "fb-loss"
-              }`}
-          >
-            {scoreFeedback.val}
-          </div>
-        )}{" "}
-        <p className="question-label">
-          {isSkipping ? (
-            <span className="answer-label">正解は...</span>
-          ) : currentQType === "nameToNum" ? (
-            "原子番号は？"
-          ) : (
-            "元素記号は？"
-          )}
-        </p>{" "}
-        <div className="element-display">
-          {currentQType === "nameToNum" ? (
-            <>
-              <h2>{currentElement.name}</h2>
-              <p className="element-symbol">({currentElement.symbol})</p>
-            </>
-          ) : (
-            <>
-              <h2>{currentElement.number}</h2>
-              <p className="element-symbol">(原子番号)</p>
-            </>
-          )}
-        </div>{" "}
-        <form onSubmit={handleCheck} className="quiz-form">
-          {" "}
-          <div className="input-group">
-            <input
-              ref={inputRef}
-              type={currentQType === "nameToNum" ? "number" : "text"}
-              value={userGuess}
-              onChange={(e) => setUserGuess(e.target.value)}
-              placeholder={currentQType === "nameToNum" ? "番号" : "記号"}
-              autoFocus
-              className={`number-input ${isSkipping ? "input-reveal" : ""}`}
-              autoComplete="off"
-              disabled={isSkipping || showRetireConfirm}
-            />
-          </div>{" "}
-          <div className="hint-area">
-            {emptyEnterCount > 0 && !isSkipping && (
-              <p key={emptyEnterCount} className="skip-hint">
-                Enterあと {3 - emptyEnterCount} 回でスキップ
-              </p>
+          <p className="question-label">
+            {isSkipping ? (
+              <span className="answer-label">正解は...</span>
+            ) : currentQType === "nameToNum" ? (
+              "原子番号は？"
+            ) : (
+              "元素記号は？"
+            )}
+          </p>{" "}
+          <div className="element-display">
+            {currentQType === "nameToNum" ? (
+              <>
+                <h2>{currentElement.name}</h2>
+                <p className="element-symbol">({currentElement.symbol})</p>
+              </>
+            ) : (
+              <>
+                <h2>{currentElement.number}</h2>
+                <p className="element-symbol">(原子番号)</p>
+              </>
             )}
           </div>{" "}
-          <div className="button-group">
-            <button
-              type="submit"
-              className="check-btn"
-              disabled={isSkipping || showRetireConfirm}
-            >
-              回答
-            </button>
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="skip-btn"
-              disabled={isSkipping || showRetireConfirm}
-            >
-              わからない
-            </button>
-          </div>{" "}
-        </form>{" "}
-        {isError && !isSkipping && <p className="message error">不正解！</p>}{" "}
-        <TouchKeyboard
-          mode={currentQType === "nameToNum" ? "number" : "text"}
-          onInput={handleKeyboardInput}
-          onDelete={handleKeyboardDelete}
-          onEnter={handleKeyboardEnter}
-          disabled={isSkipping || showRetireConfirm}
-        />
-      </div>{" "}
-      {showRetireConfirm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>終了しますか？</h3>
-            <p>ここまでの成績で結果を表示します。</p>
-            <div className="modal-buttons">
+          <form onSubmit={handleCheck} className="quiz-form">
+            {" "}
+            <div className="input-group">
+              <input
+                ref={inputRef}
+                type={currentQType === "nameToNum" ? "number" : "text"}
+                value={userGuess}
+                onChange={(e) => setUserGuess(e.target.value)}
+                placeholder={currentQType === "nameToNum" ? "番号" : "記号"}
+                autoFocus
+                className={`number-input ${isSkipping ? "input-reveal" : ""}`}
+                autoComplete="off"
+                disabled={isSkipping || showRetireConfirm}
+              />
+            </div>{" "}
+            <div className="hint-area">
+              {emptyEnterCount > 0 && !isSkipping && (
+                <p key={emptyEnterCount} className="skip-hint">
+                  Enterあと {3 - emptyEnterCount} 回でスキップ
+                </p>
+              )}
+            </div>{" "}
+            <div className="button-group">
               <button
-                onClick={cancelRetire}
-                className={`modal-no-btn ${modalSelection === "cancel" ? "focused" : ""
-                  }`}
+                type="submit"
+                className="check-btn"
+                disabled={isSkipping || showRetireConfirm}
               >
-                続ける
+                回答
               </button>
               <button
-                onClick={retryFromModal}
-                className={`modal-retry-btn ${modalSelection === "retry" ? "focused" : ""
-                  }`}
+                type="button"
+                onClick={handleSkip}
+                className="skip-btn"
+                disabled={isSkipping || showRetireConfirm}
               >
-                最初から
+                わからない
               </button>
-              <button
-                onClick={confirmRetire}
-                className={`modal-yes-btn ${modalSelection === "confirm" ? "focused" : ""
-                  }`}
-              >
-                終了する
-              </button>
+            </div>{" "}
+          </form>{" "}
+          {isError && !isSkipping && <p className="message error">不正解！</p>}{" "}
+          <TouchKeyboard
+            mode={currentQType === "nameToNum" ? "number" : "text"}
+            onInput={handleKeyboardInput}
+            onDelete={handleKeyboardDelete}
+            onEnter={handleKeyboardEnter}
+            disabled={isSkipping || showRetireConfirm}
+          />
+        </div>{" "}
+        {showRetireConfirm && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>終了しますか？</h3>
+              <p>ここまでの成績で結果を表示します。</p>
+              <div className="modal-buttons">
+                <button
+                  onClick={cancelRetire}
+                  className={`modal-no-btn ${modalSelection === "cancel" ? "focused" : ""
+                    }`}
+                >
+                  続ける
+                </button>
+                <button
+                  onClick={retryFromModal}
+                  className={`modal-retry-btn ${modalSelection === "retry" ? "focused" : ""
+                    }`}
+                >
+                  最初から
+                </button>
+                <button
+                  onClick={confirmRetire}
+                  className={`modal-yes-btn ${modalSelection === "confirm" ? "focused" : ""
+                    }`}
+                >
+                  終了する
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}{" "}
-    </div>
-  );
-}
-if (gameState === "finished") {
-  const totalTimeNum = history.reduce((acc, cur) => acc + cur.timeTaken, 0);
-  const avgNum = history.length > 0 ? totalTimeNum / history.length : 0;
-  const scoreText = history.length > 0 ? "RESULT" : "NO DATA";
-  const MAX_DIFF_SCALE = 3.0;
-  const pps = (score / Math.max(1, totalTimeNum)).toFixed(2);
-  return (
-    <div className="app-container">
-      {" "}
-      <h1>結果発表</h1>{" "}
-      <div className="card result-card">
+        )}{" "}
+      </div>
+    );
+  }
+  if (gameState === "finished") {
+    const totalTimeNum = history.reduce((acc, cur) => acc + cur.timeTaken, 0);
+    const avgNum = history.length > 0 ? totalTimeNum / history.length : 0;
+    const scoreText = history.length > 0 ? "RESULT" : "NO DATA";
+    const MAX_DIFF_SCALE = 3.0;
+    const pps = (score / Math.max(1, totalTimeNum)).toFixed(2);
+    return (
+      <div className="app-container">
         {" "}
-        <h2 className="success-text">{scoreText}</h2>{" "}
-        {newRecordFlags.score && (
-          <div
-            style={{
-              color: "gold",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              marginBottom: "10px",
-            }}
-          >
-            ★ New High Score! ★
-          </div>
-        )}{" "}
-        {newRecordFlags.time && !newRecordFlags.score && (
-          <div
-            style={{
-              color: "gold",
-              fontWeight: "bold",
-              fontSize: "1.2rem",
-              marginBottom: "10px",
-            }}
-          >
-            ★ New Best Time! ★
-          </div>
-        )}{" "}
-        <div className="score-summary">
+        <h1>結果発表</h1>{" "}
+        <div className="card result-card">
           {" "}
-          <div
-            className={`score-group-column ${newRecordFlags.score ? "popHighlight" : ""
-              }`}
-          >
-            <div className="score-label-main">Score Info</div>
-            <div className="score-row">
-              <div className="score-item">
-                <span className="label">Score</span>
-                <span className="value">{score}</span>
-              </div>
-              <div className="score-item">
-                <span className="label">Max Combo</span>
-                <span className="value">{maxCombo}</span>
-              </div>
-              <div className="score-item">
-                <span className="label">Points/s</span>
-                <span className="value">{pps}</span>
-              </div>
+          <h2 className="success-text">{scoreText}</h2>{" "}
+          {newRecordFlags.score && (
+            <div
+              style={{
+                color: "gold",
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+                marginBottom: "10px",
+              }}
+            >
+              ★ New High Score! ★
             </div>
+          )}{" "}
+          {newRecordFlags.time && !newRecordFlags.score && (
+            <div
+              style={{
+                color: "gold",
+                fontWeight: "bold",
+                fontSize: "1.2rem",
+                marginBottom: "10px",
+              }}
+            >
+              ★ New Best Time! ★
+            </div>
+          )}{" "}
+          <div className="score-summary">
+            {" "}
+            <div
+              className={`score-group-column ${newRecordFlags.score ? "popHighlight" : ""
+                }`}
+            >
+              <div className="score-label-main">Score Info</div>
+              <div className="score-row">
+                <div className="score-item">
+                  <span className="label">Score</span>
+                  <span className="value">{score}</span>
+                </div>
+                <div className="score-item">
+                  <span className="label">Max Combo</span>
+                  <span className="value">{maxCombo}</span>
+                </div>
+                <div className="score-item">
+                  <span className="label">Points/s</span>
+                  <span className="value">{pps}</span>
+                </div>
+              </div>
+            </div>{" "}
+            <div className="score-divider"></div>{" "}
+            <div
+              className={`score-group-column ${newRecordFlags.time ? "popHighlight" : ""
+                }`}
+            >
+              <div className="score-label-main">Time Info</div>
+              <div className="score-row">
+                <div className="score-item">
+                  <span className="label">Total Time</span>
+                  <span className="value">{totalTimeNum.toFixed(1)}s</span>
+                </div>
+                <div className="score-item">
+                  <span className="label">Avg Time</span>
+                  <span className="value">{avgNum.toFixed(2)}s</span>
+                </div>
+              </div>
+            </div>{" "}
           </div>{" "}
-          <div className="score-divider"></div>{" "}
-          <div
-            className={`score-group-column ${newRecordFlags.time ? "popHighlight" : ""
-              }`}
-          >
-            <div className="score-label-main">Time Info</div>
-            <div className="score-row">
-              <div className="score-item">
-                <span className="label">Total Time</span>
-                <span className="value">{totalTimeNum.toFixed(1)}s</span>
-              </div>
-              <div className="score-item">
-                <span className="label">Avg Time</span>
-                <span className="value">{avgNum.toFixed(2)}s</span>
+          {currentSettingsBest && (
+            <div className="best-score-container">
+              <div className="best-label">Best Record</div>
+              <div className="best-values">
+                <span>
+                  Score: <strong>{currentSettingsBest.score}</strong>
+                </span>
+                <span>
+                  Combo: <strong>{currentSettingsBest.maxCombo}</strong>
+                </span>
+                <span>
+                  Time: <strong>{currentSettingsBest.time || "-"}s</strong>
+                </span>
               </div>
             </div>
+          )}{" "}
+          <div className="result-actions">
+            <button
+              onClick={retryFromResult}
+              className={`retry-btn ${resultSelection === "retry" ? "focused" : ""
+                }`}
+            >
+              同じ設定で再挑戦
+            </button>
+            <button
+              onClick={resetGame}
+              className={`back-btn ${resultSelection === "menu" ? "focused" : ""
+                }`}
+            >
+              設定に戻る
+            </button>
           </div>{" "}
-        </div>{" "}
-        {currentSettingsBest && (
-          <div className="best-score-container">
-            <div className="best-label">Best Record</div>
-            <div className="best-values">
-              <span>
-                Score: <strong>{currentSettingsBest.score}</strong>
-              </span>
-              <span>
-                Combo: <strong>{currentSettingsBest.maxCombo}</strong>
-              </span>
-              <span>
-                Time: <strong>{currentSettingsBest.time || "-"}s</strong>
-              </span>
-            </div>
-          </div>
-        )}{" "}
-        <div className="result-actions">
-          <button
-            onClick={retryFromResult}
-            className={`retry-btn ${resultSelection === "retry" ? "focused" : ""
-              }`}
-          >
-            同じ設定で再挑戦
-          </button>
-          <button
-            onClick={resetGame}
-            className={`back-btn ${resultSelection === "menu" ? "focused" : ""
-              }`}
-          >
-            設定に戻る
-          </button>
-        </div>{" "}
-        <div className="history-section">
-          <h3>回答履歴 ({history.length}問)</h3>
-          <div className="history-table-container">
-            <table className="history-table">
-              <thead>
-                <tr>
-                  <th className="th-problem">問題と正解</th>
-                  <th className="th-time">タイム/スコア</th>
-                  <th className="th-chart">平均との差</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.map((item, index) => {
-                  const diff = item.timeTaken - avgNum;
-                  const absDiff = Math.abs(diff);
-                  const barWidth = (absDiff / MAX_DIFF_SCALE) * 50;
-                  let diffClass = "diff-normal";
-                  let barColorClass = "bar-normal";
-                  if (item.isSkipped) {
-                    diffClass = "diff-skipped";
-                    barColorClass = "bar-skipped";
-                  } else if (diff > 0) {
-                    diffClass = "diff-slower";
-                    barColorClass = "bar-slower";
-                  } else {
-                    diffClass = "diff-faster";
-                    barColorClass = "bar-faster";
-                  }
-                  const qType = item.element.questionType || "nameToNum";
-                  let qText, aMain;
-                  if (qType === "nameToNum") {
-                    qText = item.element.name;
-                    aMain = item.element.number;
-                  } else {
-                    qText = item.element.number;
-                    aMain = item.element.name;
-                  }
-                  const scoreDisplay =
-                    item.scoreDelta > 0
-                      ? `+${item.scoreDelta}`
-                      : item.scoreDelta;
-                  return (
-                    <tr
-                      key={index}
-                      className={
-                        item.isSkipped
-                          ? "row-skipped"
-                          : wrongItems.some(
-                            (w) => w.number === item.element.number
-                          )
-                            ? "row-wrong"
-                            : ""
-                      }
-                    >
-                      {" "}
-                      <td className="col-name">
+          <div className="history-section">
+            <h3>回答履歴 ({history.length}問)</h3>
+            <div className="history-table-container">
+              <table className="history-table">
+                <thead>
+                  <tr>
+                    <th className="th-problem">問題と正解</th>
+                    <th className="th-time">タイム/スコア</th>
+                    <th className="th-chart">平均との差</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((item, index) => {
+                    const diff = item.timeTaken - avgNum;
+                    const absDiff = Math.abs(diff);
+                    const barWidth = (absDiff / MAX_DIFF_SCALE) * 50;
+                    let diffClass = "diff-normal";
+                    let barColorClass = "bar-normal";
+                    if (item.isSkipped) {
+                      diffClass = "diff-skipped";
+                      barColorClass = "bar-skipped";
+                    } else if (diff > 0) {
+                      diffClass = "diff-slower";
+                      barColorClass = "bar-slower";
+                    } else {
+                      diffClass = "diff-faster";
+                      barColorClass = "bar-faster";
+                    }
+                    const qType = item.element.questionType || "nameToNum";
+                    let qText, aMain;
+                    if (qType === "nameToNum") {
+                      qText = item.element.name;
+                      aMain = item.element.number;
+                    } else {
+                      qText = item.element.number;
+                      aMain = item.element.name;
+                    }
+                    const scoreDisplay =
+                      item.scoreDelta > 0
+                        ? `+${item.scoreDelta}`
+                        : item.scoreDelta;
+                    return (
+                      <tr
+                        key={index}
+                        className={
+                          item.isSkipped
+                            ? "row-skipped"
+                            : wrongItems.some(
+                              (w) => w.number === item.element.number
+                            )
+                              ? "row-wrong"
+                              : ""
+                        }
+                      >
                         {" "}
-                        <div className="history-flex-row">
+                        <td className="col-name">
                           {" "}
-                          <span className="history-q">{qText}</span>{" "}
-                          <span className="history-arrow">→</span>{" "}
-                          <span className="history-a">
+                          <div className="history-flex-row">
                             {" "}
-                            <span className="history-a-main">
-                              {aMain}
+                            <span className="history-q">{qText}</span>{" "}
+                            <span className="history-arrow">→</span>{" "}
+                            <span className="history-a">
+                              {" "}
+                              <span className="history-a-main">
+                                {aMain}
+                              </span>{" "}
+                              <span className="history-a-sub">
+                                ({item.element.symbol})
+                              </span>{" "}
                             </span>{" "}
-                            <span className="history-a-sub">
-                              ({item.element.symbol})
-                            </span>{" "}
-                          </span>{" "}
-                          <div className="history-badges">
-                            {" "}
-                            {item.isSkipped && (
-                              <span className="badge-skip">SKIP</span>
-                            )}{" "}
-                            {!item.isSkipped &&
-                              wrongItems.some(
-                                (w) => w.number === item.element.number
-                              ) && (
-                                <span className="badge-wrong">MISS</span>
+                            <div className="history-badges">
+                              {" "}
+                              {item.isSkipped && (
+                                <span className="badge-skip">SKIP</span>
                               )}{" "}
+                              {!item.isSkipped &&
+                                wrongItems.some(
+                                  (w) => w.number === item.element.number
+                                ) && (
+                                  <span className="badge-wrong">MISS</span>
+                                )}{" "}
+                            </div>{" "}
                           </div>{" "}
-                        </div>{" "}
-                      </td>{" "}
-                      <td className="col-time">
-                        {" "}
-                        <div>{item.timeTaken.toFixed(2)}s</div>{" "}
-                        <div
-                          className={`history-score ${item.scoreDelta > 0 ? "score-plus" : "score-zero"
-                            }`}
-                        >
-                          {scoreDisplay}
-                        </div>{" "}
-                      </td>{" "}
-                      <td className="col-chart">
-                        {" "}
-                        <div className="chart-wrapper">
+                        </td>{" "}
+                        <td className="col-time">
                           {" "}
-                          <div className="chart-center-line"></div>{" "}
+                          <div>{item.timeTaken.toFixed(2)}s</div>{" "}
                           <div
-                            className={`chart-bar ${barColorClass}`}
-                            style={{
-                              width: `${barWidth}%`,
-                              left:
-                                diff < 0 ? `calc(50% - ${barWidth}%)` : "50%",
-                            }}
-                          ></div>{" "}
-                          <span
-                            className={`chart-label ${diff < 0 ? "label-left" : "label-right"
-                              } ${diffClass}`}
+                            className={`history-score ${item.scoreDelta > 0 ? "score-plus" : "score-zero"
+                              }`}
                           >
+                            {scoreDisplay}
+                          </div>{" "}
+                        </td>{" "}
+                        <td className="col-chart">
+                          {" "}
+                          <div className="chart-wrapper">
                             {" "}
-                            {diff > 0 ? "+" : ""}
-                            {diff.toFixed(2)}{" "}
-                          </span>{" "}
-                        </div>{" "}
-                      </td>{" "}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                            <div className="chart-center-line"></div>{" "}
+                            <div
+                              className={`chart-bar ${barColorClass}`}
+                              style={{
+                                width: `${barWidth}%`,
+                                left:
+                                  diff < 0 ? `calc(50% - ${barWidth}%)` : "50%",
+                              }}
+                            ></div>{" "}
+                            <span
+                              className={`chart-label ${diff < 0 ? "label-left" : "label-right"
+                                } ${diffClass}`}
+                            >
+                              {" "}
+                              {diff > 0 ? "+" : ""}
+                              {diff.toFixed(2)}{" "}
+                            </span>{" "}
+                          </div>{" "}
+                        </td>{" "}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>{" "}
         </div>{" "}
-      </div>{" "}
-    </div>
-  );
-}
+      </div>
+    );
+  }
 }
 
 export default App;
