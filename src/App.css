@@ -1986,9 +1986,7 @@ select:focus {
   opacity: 1;
 }
 
-.table-selection-section.closed {
-  /* Desktop default is open */
-}
+
 
 @media (max-width: 600px) {
   .settings-toggle-btn {

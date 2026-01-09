@@ -1551,427 +1551,427 @@ function App() {
                     </button>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Mobile Settings Toggle */}
-            <button
-              className="settings-toggle-btn"
-              onClick={() => setShowSettings(!showSettings)}
-            >
-              {showSettings ? "設定を隠す ▲" : "設定を表示 ▼"}
-            </button>
+                {/* Mobile Settings Toggle */}
+                <button
+                  className="settings-toggle-btn"
+                  onClick={() => setShowSettings(!showSettings)}
+                >
+                  {showSettings ? "設定を隠す ▲" : "設定を表示 ▼"}
+                </button>
 
-            <div className={`table-selection-section ${showSettings ? "open" : "closed"}`}>
-              <div className="range-content">
-                <div className="manual-range-input">
-                  <span>番号範囲:</span>
-                  <input
-                    ref={(el) => addToRefs(el, rangeRefs, 0)}
-                    type="number"
-                    min="1"
-                    max="118"
-                    value={manualRangeStart}
-                    onChange={(e) =>
-                      setManualRangeStart(Number(e.target.value))
-                    }
-                    onFocus={(e) => {
-                      e.target.select();
-                      setIsEditingInput(false);
-                    }}
-                    onBlur={() => setIsEditingInput(false)}
-                  />
-                  <span> 〜 </span>
-                  <input
-                    ref={(el) => addToRefs(el, rangeRefs, 1)}
-                    type="number"
-                    min="1"
-                    max="118"
-                    value={manualRangeEnd}
-                    onChange={(e) =>
-                      setManualRangeEnd(Number(e.target.value))
-                    }
-                    onFocus={(e) => {
-                      e.target.select();
-                      setIsEditingInput(false);
-                    }}
-                    onBlur={() => setIsEditingInput(false)}
-                  />
-                  <button
-                    ref={(el) => addToRefs(el, rangeRefs, 2)}
-                    onClick={handleButtonClick(handleAddRange)}
-                    className="sm-btn add-btn"
-                  >
-                    追加
-                  </button>
-                  <button
-                    ref={(el) => addToRefs(el, rangeRefs, 3)}
-                    onClick={handleButtonClick(handleRemoveRange)}
-                    className="sm-btn remove-btn"
-                  >
-                    除外
-                  </button>
-                </div>
-                <div className="bulk-actions">
-                  <button
-                    ref={(el) => addToRefs(el, bulkRefs, 0)}
-                    onClick={handleButtonClick(handleSelectAll)}
-                    className="sm-btn"
-                  >
-                    全選択
-                  </button>
-                  <button
-                    ref={(el) => addToRefs(el, bulkRefs, 1)}
-                    onClick={handleButtonClick(handleClearAll)}
-                    className="sm-btn"
-                  >
-                    全解除
-                  </button>
-                </div>
-              </div>
-              <div className="menu-tabs">
-                <button
-                  ref={(el) => addToRefs(el, tabRefs, 0)}
-                  className={menuTab === "series" ? "tab-active" : ""}
-                  onClick={handleButtonClick(() => setMenuTab("series"))}
-                >
-                  系列から選ぶ
-                </button>
-                <button
-                  ref={(el) => addToRefs(el, tabRefs, 1)}
-                  className={menuTab === "custom" ? "tab-active" : ""}
-                  onClick={handleButtonClick(() => setMenuTab("custom"))}
-                >
-                  ユーザー定義範囲
-                </button>
-              </div>
-              <div className="slide-wrapper">
-                <div
-                  className={`slide-container ${menuTab === "custom" ? "slide-left" : ""
-                    }`}
-                >
-                  <div className="slide-page">
-                    <div className="series-legend">
-                      {SERIES_LEGEND.map((s) => (
-                        <button
-                          key={s.id}
-                          ref={(el) => addToRefsPush(el, seriesRefs)}
-                          className="legend-btn"
-                          style={{ backgroundColor: s.color }}
-                          onClick={handleButtonClick(() =>
-                            toggleSeries(s.id)
-                          )}
-                        >
-                          {s.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="slide-page">
-                    <div className="save-group-section">
+                <div className={`table-selection-section ${showSettings ? "open" : "closed"}`}>
+                  <div className="range-content">
+                    <div className="manual-range-input">
+                      <span>番号範囲:</span>
                       <input
-                        ref={(el) => addToRefs(el, saveRefs, 0)}
-                        type="text"
-                        placeholder="名前をつけて保存"
-                        value={newGroupName}
-                        onChange={(e) => setNewGroupName(e.target.value)}
-                        className="save-input"
-                        onFocus={() => setIsEditingInput(false)}
+                        ref={(el) => addToRefs(el, rangeRefs, 0)}
+                        type="number"
+                        min="1"
+                        max="118"
+                        value={manualRangeStart}
+                        onChange={(e) =>
+                          setManualRangeStart(Number(e.target.value))
+                        }
+                        onFocus={(e) => {
+                          e.target.select();
+                          setIsEditingInput(false);
+                        }}
+                        onBlur={() => setIsEditingInput(false)}
+                      />
+                      <span> 〜 </span>
+                      <input
+                        ref={(el) => addToRefs(el, rangeRefs, 1)}
+                        type="number"
+                        min="1"
+                        max="118"
+                        value={manualRangeEnd}
+                        onChange={(e) =>
+                          setManualRangeEnd(Number(e.target.value))
+                        }
+                        onFocus={(e) => {
+                          e.target.select();
+                          setIsEditingInput(false);
+                        }}
                         onBlur={() => setIsEditingInput(false)}
                       />
                       <button
-                        ref={(el) => addToRefs(el, saveRefs, 1)}
-                        onClick={handleButtonClick(saveCustomGroup)}
-                        className="sm-btn save-btn"
+                        ref={(el) => addToRefs(el, rangeRefs, 2)}
+                        onClick={handleButtonClick(handleAddRange)}
+                        className="sm-btn add-btn"
                       >
-                        保存
+                        追加
+                      </button>
+                      <button
+                        ref={(el) => addToRefs(el, rangeRefs, 3)}
+                        onClick={handleButtonClick(handleRemoveRange)}
+                        className="sm-btn remove-btn"
+                      >
+                        除外
                       </button>
                     </div>
-                    <div className="custom-groups-list">
-                      {customGroups.map((g) => (
-                        <div key={g.id} className="custom-group-item">
+                    <div className="bulk-actions">
+                      <button
+                        ref={(el) => addToRefs(el, bulkRefs, 0)}
+                        onClick={handleButtonClick(handleSelectAll)}
+                        className="sm-btn"
+                      >
+                        全選択
+                      </button>
+                      <button
+                        ref={(el) => addToRefs(el, bulkRefs, 1)}
+                        onClick={handleButtonClick(handleClearAll)}
+                        className="sm-btn"
+                      >
+                        全解除
+                      </button>
+                    </div>
+                  </div>
+                  <div className="menu-tabs">
+                    <button
+                      ref={(el) => addToRefs(el, tabRefs, 0)}
+                      className={menuTab === "series" ? "tab-active" : ""}
+                      onClick={handleButtonClick(() => setMenuTab("series"))}
+                    >
+                      系列から選ぶ
+                    </button>
+                    <button
+                      ref={(el) => addToRefs(el, tabRefs, 1)}
+                      className={menuTab === "custom" ? "tab-active" : ""}
+                      onClick={handleButtonClick(() => setMenuTab("custom"))}
+                    >
+                      ユーザー定義範囲
+                    </button>
+                  </div>
+                  <div className="slide-wrapper">
+                    <div
+                      className={`slide-container ${menuTab === "custom" ? "slide-left" : ""
+                        }`}
+                    >
+                      <div className="slide-page">
+                        <div className="series-legend">
+                          {SERIES_LEGEND.map((s) => (
+                            <button
+                              key={s.id}
+                              ref={(el) => addToRefsPush(el, seriesRefs)}
+                              className="legend-btn"
+                              style={{ backgroundColor: s.color }}
+                              onClick={handleButtonClick(() =>
+                                toggleSeries(s.id)
+                              )}
+                            >
+                              {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="slide-page">
+                        <div className="save-group-section">
+                          <input
+                            ref={(el) => addToRefs(el, saveRefs, 0)}
+                            type="text"
+                            placeholder="名前をつけて保存"
+                            value={newGroupName}
+                            onChange={(e) => setNewGroupName(e.target.value)}
+                            className="save-input"
+                            onFocus={() => setIsEditingInput(false)}
+                            onBlur={() => setIsEditingInput(false)}
+                          />
                           <button
-                            ref={(el) => addToRefsPush(el, customRefs)}
-                            className="legend-btn custom-btn"
-                            onClick={handleButtonClick(() =>
-                              toggleCustomGroup(g)
-                            )}
+                            ref={(el) => addToRefs(el, saveRefs, 1)}
+                            onClick={handleButtonClick(saveCustomGroup)}
+                            className="sm-btn save-btn"
                           >
-                            {g.label} ({g.numbers.length})
+                            保存
                           </button>
-                          <span
-                            className="delete-icon"
-                            onClick={(e) => deleteCustomGroup(g.id, e)}
-                          >
-                            ×
-                          </span>
+                        </div>
+                        <div className="custom-groups-list">
+                          {customGroups.map((g) => (
+                            <div key={g.id} className="custom-group-item">
+                              <button
+                                ref={(el) => addToRefsPush(el, customRefs)}
+                                className="legend-btn custom-btn"
+                                onClick={handleButtonClick(() =>
+                                  toggleCustomGroup(g)
+                                )}
+                              >
+                                {g.label} ({g.numbers.length})
+                              </button>
+                              <span
+                                className="delete-icon"
+                                onClick={(e) => deleteCustomGroup(g.id, e)}
+                              >
+                                ×
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="periodic-table-wrapper">
+                    <div className="periodic-table-grid">
+                      {Array.from({ length: 18 }, (_, i) => i + 1).map((g) => (
+                        <div
+                          key={`g-${g}`}
+                          className="group-header"
+                          style={{ gridColumn: g + 1, gridRow: 1 }}
+                          onClick={() => toggleGroupColumn(g)}
+                        >
+                          {g}
                         </div>
                       ))}
+                      {Array.from({ length: 7 }, (_, i) => i + 1).map((p) => (
+                        <div
+                          key={`p-${p}`}
+                          className="period-header"
+                          style={{ gridColumn: 1, gridRow: p + 1 }}
+                          onClick={() => togglePeriod(p)}
+                        >
+                          {p}
+                        </div>
+                      ))}
+                      {elementsData.map((el) => {
+                        let isSelected = false;
+                        if (el.isPlaceholder) {
+                          const targetSeries = el.targetGroup;
+                          const targetElements = elementsData
+                            .filter(
+                              (e) =>
+                                e.group === targetSeries && !e.isPlaceholder
+                            )
+                            .map((e) => e.number);
+                          isSelected = targetElements.every((n) =>
+                            selectedNumbers.includes(n)
+                          );
+                        } else {
+                          isSelected = selectedNumbers.includes(el.number);
+                        }
+                        return (
+                          <div
+                            key={el.number || el.label}
+                            className={`element-cell ${isSelected ? "selected" : ""
+                              }`}
+                            style={{
+                              gridColumn: el.displayGroup + 1,
+                              gridRow: el.displayPeriod + 1,
+                              backgroundColor: isSelected
+                                ? getElementColor(el)
+                                : "#f0f0f0",
+                              opacity: isSelected ? 1 : 0.4,
+                            }}
+                            onClick={() => toggleElement(el)}
+                            title={el.name}
+                          >
+                            <div className="cell-num">{el.number}</div>
+                            <div className="cell-sym">{el.symbol}</div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
+                <button
+                  ref={startBtnRef}
+                  onClick={handleButtonClick(startGame)}
+                  className="start-btn"
+                >
+                  スタート
+                </button>
               </div>
-              <div className="periodic-table-wrapper">
-                <div className="periodic-table-grid">
-                  {Array.from({ length: 18 }, (_, i) => i + 1).map((g) => (
-                    <div
-                      key={`g-${g}`}
-                      className="group-header"
-                      style={{ gridColumn: g + 1, gridRow: 1 }}
-                      onClick={() => toggleGroupColumn(g)}
+            </div>
+
+            <div className="menu-slide">
+              <div className="card menu-card history-card">
+                <h2 style={{ marginBottom: "15px" }}>クリア履歴</h2>
+                <div className="filter-controls">
+                  <div className="filter-group">
+                    <label>モード:</label>
+                    <select
+                      ref={(el) => addToRefs(el, historyFilterStyleRefs, 0)}
+                      value={historyFilterStyle}
+                      onChange={(e) => setHistoryFilterStyle(e.target.value)}
                     >
-                      {g}
-                    </div>
-                  ))}
-                  {Array.from({ length: 7 }, (_, i) => i + 1).map((p) => (
-                    <div
-                      key={`p-${p}`}
-                      className="period-header"
-                      style={{ gridColumn: 1, gridRow: p + 1 }}
-                      onClick={() => togglePeriod(p)}
+                      <option value="all">すべて</option>
+                      <option value="standard">クラシック</option>
+                      <option value="infinite">エンドレス</option>
+                    </select>
+                  </div>
+                  <div className="filter-group">
+                    <label>形式:</label>
+                    <select
+                      ref={(el) => addToRefs(el, historyFilterModeRefs, 0)}
+                      value={historyFilterMode}
+                      onChange={(e) => setHistoryFilterMode(e.target.value)}
                     >
-                      {p}
-                    </div>
-                  ))}
-                  {elementsData.map((el) => {
-                    let isSelected = false;
-                    if (el.isPlaceholder) {
-                      const targetSeries = el.targetGroup;
-                      const targetElements = elementsData
-                        .filter(
-                          (e) =>
-                            e.group === targetSeries && !e.isPlaceholder
-                        )
-                        .map((e) => e.number);
-                      isSelected = targetElements.every((n) =>
-                        selectedNumbers.includes(n)
-                      );
-                    } else {
-                      isSelected = selectedNumbers.includes(el.number);
+                      <option value="all">すべて</option>
+                      <option value="nameToNum">名前→番号</option>
+                      <option value="numToSym">番号→記号</option>
+                      <option value="shuffle">シャッフル</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="sort-tabs">
+                  <button
+                    ref={(el) => addToRefs(el, historySortRefs, 0)}
+                    className={historySort === "date" ? "sort-active" : ""}
+                    onClick={handleButtonClick(() => setHistorySort("date"))}
+                  >
+                    日付順
+                  </button>
+                  <button
+                    ref={(el) => addToRefs(el, historySortRefs, 1)}
+                    className={historySort === "score" ? "sort-active" : ""}
+                    onClick={handleButtonClick(() => setHistorySort("score"))}
+                  >
+                    スコア順
+                  </button>
+                  <button
+                    ref={(el) => addToRefs(el, historySortRefs, 2)}
+                    className={
+                      historySort === "efficiency" ? "sort-active" : ""
                     }
-                    return (
-                      <div
-                        key={el.number || el.label}
-                        className={`element-cell ${isSelected ? "selected" : ""
-                          }`}
-                        style={{
-                          gridColumn: el.displayGroup + 1,
-                          gridRow: el.displayPeriod + 1,
-                          backgroundColor: isSelected
-                            ? getElementColor(el)
-                            : "#f0f0f0",
-                          opacity: isSelected ? 1 : 0.4,
-                        }}
-                        onClick={() => toggleElement(el)}
-                        title={el.name}
-                      >
-                        <div className="cell-num">{el.number}</div>
-                        <div className="cell-sym">{el.symbol}</div>
-                      </div>
-                    );
-                  })}
+                    onClick={handleButtonClick(() =>
+                      setHistorySort("efficiency")
+                    )}
+                  >
+                    効率順
+                  </button>
+                </div>
+
+                <div className="history-list-wrapper">
+                  <table className="record-table">
+                    <thead>
+                      <tr>
+                        <th>日時</th>
+                        <th>設定</th>
+                        <th>スコア</th>
+                        <th>効率</th>
+                        <th>タイム</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {displayHistory.length === 0 && (
+                        <tr>
+                          <td colSpan="5" className="no-data">
+                            履歴がありません
+                          </td>
+                        </tr>
+                      )}
+                      {displayHistory.map((rec, i) => (
+                        <tr
+                          key={i}
+                          ref={(el) => addToRefsPush(el, historyRowRefs)}
+                          tabIndex="0"
+                          className={rec.isRetired ? "row-retired" : ""}
+                          onClick={() => setViewingHistory(rec)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <td className="rec-date">
+                            {rec.date.split(" ")[0]}
+                            <br />
+                            {rec.date.split(" ")[1]}
+                          </td>
+                          <td className="rec-mode">
+                            <span className="mode-badge">
+                              {getStyleLabel(rec.style)}
+                            </span>
+                            <br />
+                            <span className="type-badge">
+                              {getModeLabel(rec.mode)}
+                            </span>
+                          </td>
+                          <td className="rec-score">{rec.score}</td>
+                          <td className="rec-pps">
+                            {Math.floor(
+                              rec.score / Math.max(1, parseFloat(rec.time))
+                            )}{" "}
+                            <span style={{ fontSize: "0.7em" }}>points/s</span>
+                          </td>
+                          <td className="rec-time">{rec.time}s</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
-            <button
-              ref={startBtnRef}
-              onClick={handleButtonClick(startGame)}
-              className="start-btn"
-            >
-              スタート
-            </button>
           </div>
-        </div>
 
-        <div className="menu-slide">
-          <div className="card menu-card history-card">
-            <h2 style={{ marginBottom: "15px" }}>クリア履歴</h2>
-            <div className="filter-controls">
-              <div className="filter-group">
-                <label>モード:</label>
-                <select
-                  ref={(el) => addToRefs(el, historyFilterStyleRefs, 0)}
-                  value={historyFilterStyle}
-                  onChange={(e) => setHistoryFilterStyle(e.target.value)}
+
+
+          {
+            viewingHistory && (
+              <div
+                className="modal-overlay"
+                onClick={() => setViewingHistory(null)}
+              >
+                <div
+                  className="modal-content history-detail-modal"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  <option value="all">すべて</option>
-                  <option value="standard">クラシック</option>
-                  <option value="infinite">エンドレス</option>
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>形式:</label>
-                <select
-                  ref={(el) => addToRefs(el, historyFilterModeRefs, 0)}
-                  value={historyFilterMode}
-                  onChange={(e) => setHistoryFilterMode(e.target.value)}
-                >
-                  <option value="all">すべて</option>
-                  <option value="nameToNum">名前→番号</option>
-                  <option value="numToSym">番号→記号</option>
-                  <option value="shuffle">シャッフル</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="sort-tabs">
-              <button
-                ref={(el) => addToRefs(el, historySortRefs, 0)}
-                className={historySort === "date" ? "sort-active" : ""}
-                onClick={handleButtonClick(() => setHistorySort("date"))}
-              >
-                日付順
-              </button>
-              <button
-                ref={(el) => addToRefs(el, historySortRefs, 1)}
-                className={historySort === "score" ? "sort-active" : ""}
-                onClick={handleButtonClick(() => setHistorySort("score"))}
-              >
-                スコア順
-              </button>
-              <button
-                ref={(el) => addToRefs(el, historySortRefs, 2)}
-                className={
-                  historySort === "efficiency" ? "sort-active" : ""
-                }
-                onClick={handleButtonClick(() =>
-                  setHistorySort("efficiency")
-                )}
-              >
-                効率順
-              </button>
-            </div>
-
-            <div className="history-list-wrapper">
-              <table className="record-table">
-                <thead>
-                  <tr>
-                    <th>日時</th>
-                    <th>設定</th>
-                    <th>スコア</th>
-                    <th>効率</th>
-                    <th>タイム</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayHistory.length === 0 && (
-                    <tr>
-                      <td colSpan="5" className="no-data">
-                        履歴がありません
-                      </td>
-                    </tr>
+                  <h3>プレイ詳細</h3>
+                  {viewingHistory.isRetired && (
+                    <div className="retired-badge">RETIRED</div>
                   )}
-                  {displayHistory.map((rec, i) => (
-                    <tr
-                      key={i}
-                      ref={(el) => addToRefsPush(el, historyRowRefs)}
-                      tabIndex="0"
-                      className={rec.isRetired ? "row-retired" : ""}
-                      onClick={() => setViewingHistory(rec)}
-                      style={{ cursor: "pointer" }}
+                  <div className="detail-row">
+                    <span>日時:</span> <strong>{viewingHistory.date}</strong>
+                  </div>
+                  <div className="detail-row">
+                    <span>モード:</span>{" "}
+                    <strong>
+                      {getStyleLabel(viewingHistory.style)} /{" "}
+                      {getModeLabel(viewingHistory.mode)}
+                    </strong>
+                  </div>
+                  <div className="detail-row">
+                    <span>スコア:</span>{" "}
+                    <strong style={{ color: "#007bff" }}>
+                      {viewingHistory.score}
+                    </strong>
+                  </div>
+                  <div className="detail-row">
+                    <span>コンボ:</span> <strong>{viewingHistory.maxCombo}</strong>
+                  </div>
+                  <div className="detail-row">
+                    <span>タイム:</span> <strong>{viewingHistory.time}s</strong>
+                  </div>
+                  <hr />
+                  <h4>
+                    出題範囲 (
+                    {viewingHistory.selectedNumbers
+                      ? viewingHistory.selectedNumbers.length
+                      : 0}
+                    )
+                  </h4>
+                  <div className="symbol-list">
+                    {viewingHistory.selectedNumbers &&
+                      viewingHistory.selectedNumbers.map((num) => (
+                        <span key={num} className="symbol-tag">
+                          {getSymbolByNumber(num)}
+                          <span className="sub-num">{num}</span>
+                        </span>
+                      ))}
+                    {(!viewingHistory.selectedNumbers ||
+                      viewingHistory.selectedNumbers.length === 0) && (
+                        <p className="no-data">範囲データなし</p>
+                      )}
+                  </div>
+                  <div className="modal-buttons" style={{ marginTop: "20px" }}>
+                    <button
+                      onClick={() => setViewingHistory(null)}
+                      className="modal-no-btn"
                     >
-                      <td className="rec-date">
-                        {rec.date.split(" ")[0]}
-                        <br />
-                        {rec.date.split(" ")[1]}
-                      </td>
-                      <td className="rec-mode">
-                        <span className="mode-badge">
-                          {getStyleLabel(rec.style)}
-                        </span>
-                        <br />
-                        <span className="type-badge">
-                          {getModeLabel(rec.mode)}
-                        </span>
-                      </td>
-                      <td className="rec-score">{rec.score}</td>
-                      <td className="rec-pps">
-                        {Math.floor(
-                          rec.score / Math.max(1, parseFloat(rec.time))
-                        )}{" "}
-                        <span style={{ fontSize: "0.7em" }}>points/s</span>
-                      </td>
-                      <td className="rec-time">{rec.time}s</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                      閉じる
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          }
         </div>
       </div>
-
-
-      {
-      viewingHistory && (
-        <div
-          className="modal-overlay"
-          onClick={() => setViewingHistory(null)}
-        >
-          <div
-            className="modal-content history-detail-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>プレイ詳細</h3>
-            {viewingHistory.isRetired && (
-              <div className="retired-badge">RETIRED</div>
-            )}
-            <div className="detail-row">
-              <span>日時:</span> <strong>{viewingHistory.date}</strong>
-            </div>
-            <div className="detail-row">
-              <span>モード:</span>{" "}
-              <strong>
-                {getStyleLabel(viewingHistory.style)} /{" "}
-                {getModeLabel(viewingHistory.mode)}
-              </strong>
-            </div>
-            <div className="detail-row">
-              <span>スコア:</span>{" "}
-              <strong style={{ color: "#007bff" }}>
-                {viewingHistory.score}
-              </strong>
-            </div>
-            <div className="detail-row">
-              <span>コンボ:</span> <strong>{viewingHistory.maxCombo}</strong>
-            </div>
-            <div className="detail-row">
-              <span>タイム:</span> <strong>{viewingHistory.time}s</strong>
-            </div>
-            <hr />
-            <h4>
-              出題範囲 (
-              {viewingHistory.selectedNumbers
-                ? viewingHistory.selectedNumbers.length
-                : 0}
-              )
-            </h4>
-            <div className="symbol-list">
-              {viewingHistory.selectedNumbers &&
-                viewingHistory.selectedNumbers.map((num) => (
-                  <span key={num} className="symbol-tag">
-                    {getSymbolByNumber(num)}
-                    <span className="sub-num">{num}</span>
-                  </span>
-                ))}
-              {(!viewingHistory.selectedNumbers ||
-                viewingHistory.selectedNumbers.length === 0) && (
-                  <p className="no-data">範囲データなし</p>
-                )}
-            </div>
-            <div className="modal-buttons" style={{ marginTop: "20px" }}>
-              <button
-                onClick={() => setViewingHistory(null)}
-                className="modal-no-btn"
-              >
-                閉じる
-              </button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-      </div >
     );
   }
 
