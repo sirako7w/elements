@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./App.css";
+import TouchKeyboard from "./TouchKeyboard";
 
 // --- データ定義 ---
 const rawElements = [
@@ -324,6 +325,8 @@ function App() {
   const [menuTab, setMenuTab] = useState("series");
   const [playStyle, setPlayStyle] = useState("standard");
   const [menuPage, setMenuPage] = useState("settings");
+  // Mobile optimization: settings toggle (default hidden on mobile, logical default false)
+  const [showSettings, setShowSettings] = useState(false);
 
   const [historySort, setHistorySort] = useState("date");
   const [historyFilterStyle, setHistoryFilterStyle] = useState("all");
@@ -677,6 +680,7 @@ function App() {
     setCurrentSettingsBest(allBestScores[settingsKey] || null);
     setNewRecordFlags({ score: false, time: false });
 
+    // Queue generation logic
     const filtered = elementsData.filter(
       (el) => !el.isPlaceholder && selectedNumbers.includes(el.number)
     );
@@ -710,7 +714,12 @@ function App() {
     setHistory([]);
     setShowRetireConfirm(false);
     setCurrentTimer("0.0");
-    setGameState("ready");
+
+    // Direct start with loading screen
+    setGameState("loading");
+    setTimeout(() => {
+      startRealGame();
+    }, 1000);
   };
 
   const startRealGame = () => {
@@ -735,7 +744,7 @@ function App() {
         );
         nextElement =
           filteredCandidates[
-            Math.floor(Math.random() * filteredCandidates.length)
+          Math.floor(Math.random() * filteredCandidates.length)
           ];
       } else {
         nextElement = candidates[0];
@@ -830,6 +839,39 @@ function App() {
       setLastAnswerTime(Date.now());
     }, 1500);
   };
+
+  const handleKeyboardInput = (char) => {
+    if (isSkipping || showRetireConfirm) return;
+
+    // Auto-formatting for symbol input (numToSym)
+    // Logic: 1st char Upper, rest Lower
+    const currentElement = quizQueue[currentIndex];
+    const qType = currentElement ? (currentElement.questionType || gameMode) : gameMode;
+
+    if (qType === "numToSym") {
+      setUserGuess((prev) => {
+        const next = prev + char;
+        if (next.length === 1) return next.toUpperCase();
+        // If prev was empty, char becomes Upper. 
+        // But here we are appending. So if prev is empty, it means this is 1st char.
+        // If prev is not empty, it is 2nd+ char.
+        return prev + char.toLowerCase();
+      });
+    } else {
+      setUserGuess((prev) => prev + char);
+    }
+  };
+
+  const handleKeyboardDelete = () => {
+    if (isSkipping || showRetireConfirm) return;
+    setUserGuess((prev) => prev.slice(0, -1));
+  };
+
+  const handleKeyboardEnter = (e) => {
+    if (isSkipping || showRetireConfirm) return;
+    handleCheck(e || { preventDefault: () => { } });
+  };
+
   const handleCheck = (e) => {
     e.preventDefault();
     if (isSkipping || showRetireConfirm) return;
@@ -957,7 +999,7 @@ function App() {
         "periodic_custom_groups",
         JSON.stringify(customGroups)
       );
-    } catch (e) {}
+    } catch (e) { }
   }, [customGroups]);
 
   useEffect(() => {
@@ -1305,8 +1347,8 @@ function App() {
             currentItemIndex === 0
               ? "nameToNum"
               : currentItemIndex === 1
-              ? "numToSym"
-              : "shuffle"
+                ? "numToSym"
+                : "shuffle"
           );
         } else if (currentGroupIndex === 5) {
           setMenuTab(currentItemIndex === 0 ? "series" : "custom");
@@ -1452,9 +1494,8 @@ function App() {
           <div
             className="menu-slider"
             style={{
-              transform: `translateX(${
-                menuPage === "settings" ? "0%" : "-50%"
-              })`,
+              transform: `translateX(${menuPage === "settings" ? "0%" : "-50%"
+                })`,
             }}
           >
             <div className="menu-slide">
@@ -1510,840 +1551,847 @@ function App() {
                     </button>
                   </div>
                 </div>
-                <div className="table-selection-section">
-                  <div className="range-content">
-                    <div className="manual-range-input">
-                      <span>番号範囲:</span>
-                      <input
-                        ref={(el) => addToRefs(el, rangeRefs, 0)}
-                        type="number"
-                        min="1"
-                        max="118"
-                        value={manualRangeStart}
-                        onChange={(e) =>
-                          setManualRangeStart(Number(e.target.value))
-                        }
-                        onFocus={(e) => {
-                          e.target.select();
-                          setIsEditingInput(false);
-                        }}
-                        onBlur={() => setIsEditingInput(false)}
-                      />
-                      <span> 〜 </span>
-                      <input
-                        ref={(el) => addToRefs(el, rangeRefs, 1)}
-                        type="number"
-                        min="1"
-                        max="118"
-                        value={manualRangeEnd}
-                        onChange={(e) =>
-                          setManualRangeEnd(Number(e.target.value))
-                        }
-                        onFocus={(e) => {
-                          e.target.select();
-                          setIsEditingInput(false);
-                        }}
-                        onBlur={() => setIsEditingInput(false)}
-                      />
-                      <button
-                        ref={(el) => addToRefs(el, rangeRefs, 2)}
-                        onClick={handleButtonClick(handleAddRange)}
-                        className="sm-btn add-btn"
-                      >
-                        追加
-                      </button>
-                      <button
-                        ref={(el) => addToRefs(el, rangeRefs, 3)}
-                        onClick={handleButtonClick(handleRemoveRange)}
-                        className="sm-btn remove-btn"
-                      >
-                        除外
-                      </button>
-                    </div>
-                    <div className="bulk-actions">
-                      <button
-                        ref={(el) => addToRefs(el, bulkRefs, 0)}
-                        onClick={handleButtonClick(handleSelectAll)}
-                        className="sm-btn"
-                      >
-                        全選択
-                      </button>
-                      <button
-                        ref={(el) => addToRefs(el, bulkRefs, 1)}
-                        onClick={handleButtonClick(handleClearAll)}
-                        className="sm-btn"
-                      >
-                        全解除
-                      </button>
-                    </div>
-                  </div>
-                  <div className="menu-tabs">
-                    <button
-                      ref={(el) => addToRefs(el, tabRefs, 0)}
-                      className={menuTab === "series" ? "tab-active" : ""}
-                      onClick={handleButtonClick(() => setMenuTab("series"))}
-                    >
-                      系列から選ぶ
-                    </button>
-                    <button
-                      ref={(el) => addToRefs(el, tabRefs, 1)}
-                      className={menuTab === "custom" ? "tab-active" : ""}
-                      onClick={handleButtonClick(() => setMenuTab("custom"))}
-                    >
-                      ユーザー定義範囲
-                    </button>
-                  </div>
-                  <div className="slide-wrapper">
-                    <div
-                      className={`slide-container ${
-                        menuTab === "custom" ? "slide-left" : ""
-                      }`}
-                    >
-                      <div className="slide-page">
-                        <div className="series-legend">
-                          {SERIES_LEGEND.map((s) => (
-                            <button
-                              key={s.id}
-                              ref={(el) => addToRefsPush(el, seriesRefs)}
-                              className="legend-btn"
-                              style={{ backgroundColor: s.color }}
-                              onClick={handleButtonClick(() =>
-                                toggleSeries(s.id)
-                              )}
-                            >
-                              {s.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="slide-page">
-                        <div className="save-group-section">
-                          <input
-                            ref={(el) => addToRefs(el, saveRefs, 0)}
-                            type="text"
-                            placeholder="名前をつけて保存"
-                            value={newGroupName}
-                            onChange={(e) => setNewGroupName(e.target.value)}
-                            className="save-input"
-                            onFocus={() => setIsEditingInput(false)}
-                            onBlur={() => setIsEditingInput(false)}
-                          />
-                          <button
-                            ref={(el) => addToRefs(el, saveRefs, 1)}
-                            onClick={handleButtonClick(saveCustomGroup)}
-                            className="sm-btn save-btn"
-                          >
-                            保存
-                          </button>
-                        </div>
-                        <div className="custom-groups-list">
-                          {customGroups.map((g) => (
-                            <div key={g.id} className="custom-group-item">
-                              <button
-                                ref={(el) => addToRefsPush(el, customRefs)}
-                                className="legend-btn custom-btn"
-                                onClick={handleButtonClick(() =>
-                                  toggleCustomGroup(g)
-                                )}
-                              >
-                                {g.label} ({g.numbers.length})
-                              </button>
-                              <span
-                                className="delete-icon"
-                                onClick={(e) => deleteCustomGroup(g.id, e)}
-                              >
-                                ×
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="periodic-table-wrapper">
-                    <div className="periodic-table-grid">
-                      {Array.from({ length: 18 }, (_, i) => i + 1).map((g) => (
-                        <div
-                          key={`g-${g}`}
-                          className="group-header"
-                          style={{ gridColumn: g + 1, gridRow: 1 }}
-                          onClick={() => toggleGroupColumn(g)}
-                        >
-                          {g}
-                        </div>
-                      ))}
-                      {Array.from({ length: 7 }, (_, i) => i + 1).map((p) => (
-                        <div
-                          key={`p-${p}`}
-                          className="period-header"
-                          style={{ gridColumn: 1, gridRow: p + 1 }}
-                          onClick={() => togglePeriod(p)}
-                        >
-                          {p}
-                        </div>
-                      ))}
-                      {elementsData.map((el) => {
-                        let isSelected = false;
-                        if (el.isPlaceholder) {
-                          const targetSeries = el.targetGroup;
-                          const targetElements = elementsData
-                            .filter(
-                              (e) =>
-                                e.group === targetSeries && !e.isPlaceholder
-                            )
-                            .map((e) => e.number);
-                          isSelected = targetElements.every((n) =>
-                            selectedNumbers.includes(n)
-                          );
-                        } else {
-                          isSelected = selectedNumbers.includes(el.number);
-                        }
-                        return (
-                          <div
-                            key={el.number || el.label}
-                            className={`element-cell ${
-                              isSelected ? "selected" : ""
-                            }`}
-                            style={{
-                              gridColumn: el.displayGroup + 1,
-                              gridRow: el.displayPeriod + 1,
-                              backgroundColor: isSelected
-                                ? getElementColor(el)
-                                : "#f0f0f0",
-                              opacity: isSelected ? 1 : 0.4,
-                            }}
-                            onClick={() => toggleElement(el)}
-                            title={el.name}
-                          >
-                            <div className="cell-num">{el.number}</div>
-                            <div className="cell-sym">{el.symbol}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  ref={startBtnRef}
-                  onClick={handleButtonClick(startGame)}
-                  className="start-btn"
-                >
-                  スタート
-                </button>
               </div>
             </div>
 
-            <div className="menu-slide">
-              <div className="card menu-card history-card">
-                <h2 style={{ marginBottom: "15px" }}>クリア履歴</h2>
-                <div className="filter-controls">
-                  <div className="filter-group">
-                    <label>モード:</label>
-                    <select
-                      ref={(el) => addToRefs(el, historyFilterStyleRefs, 0)}
-                      value={historyFilterStyle}
-                      onChange={(e) => setHistoryFilterStyle(e.target.value)}
-                    >
-                      <option value="all">すべて</option>
-                      <option value="standard">クラシック</option>
-                      <option value="infinite">エンドレス</option>
-                    </select>
-                  </div>
-                  <div className="filter-group">
-                    <label>形式:</label>
-                    <select
-                      ref={(el) => addToRefs(el, historyFilterModeRefs, 0)}
-                      value={historyFilterMode}
-                      onChange={(e) => setHistoryFilterMode(e.target.value)}
-                    >
-                      <option value="all">すべて</option>
-                      <option value="nameToNum">名前→番号</option>
-                      <option value="numToSym">番号→記号</option>
-                      <option value="shuffle">シャッフル</option>
-                    </select>
-                  </div>
-                </div>
+            {/* Mobile Settings Toggle */}
+            <button
+              className="settings-toggle-btn"
+              onClick={() => setShowSettings(!showSettings)}
+            >
+              {showSettings ? "設定を隠す ▲" : "設定を表示 ▼"}
+            </button>
 
-                <div className="sort-tabs">
-                  <button
-                    ref={(el) => addToRefs(el, historySortRefs, 0)}
-                    className={historySort === "date" ? "sort-active" : ""}
-                    onClick={handleButtonClick(() => setHistorySort("date"))}
-                  >
-                    日付順
-                  </button>
-                  <button
-                    ref={(el) => addToRefs(el, historySortRefs, 1)}
-                    className={historySort === "score" ? "sort-active" : ""}
-                    onClick={handleButtonClick(() => setHistorySort("score"))}
-                  >
-                    スコア順
-                  </button>
-                  <button
-                    ref={(el) => addToRefs(el, historySortRefs, 2)}
-                    className={
-                      historySort === "efficiency" ? "sort-active" : ""
+            <div className={`table-selection-section ${showSettings ? "open" : "closed"}`}>
+              <div className="range-content">
+                <div className="manual-range-input">
+                  <span>番号範囲:</span>
+                  <input
+                    ref={(el) => addToRefs(el, rangeRefs, 0)}
+                    type="number"
+                    min="1"
+                    max="118"
+                    value={manualRangeStart}
+                    onChange={(e) =>
+                      setManualRangeStart(Number(e.target.value))
                     }
-                    onClick={handleButtonClick(() =>
-                      setHistorySort("efficiency")
-                    )}
+                    onFocus={(e) => {
+                      e.target.select();
+                      setIsEditingInput(false);
+                    }}
+                    onBlur={() => setIsEditingInput(false)}
+                  />
+                  <span> 〜 </span>
+                  <input
+                    ref={(el) => addToRefs(el, rangeRefs, 1)}
+                    type="number"
+                    min="1"
+                    max="118"
+                    value={manualRangeEnd}
+                    onChange={(e) =>
+                      setManualRangeEnd(Number(e.target.value))
+                    }
+                    onFocus={(e) => {
+                      e.target.select();
+                      setIsEditingInput(false);
+                    }}
+                    onBlur={() => setIsEditingInput(false)}
+                  />
+                  <button
+                    ref={(el) => addToRefs(el, rangeRefs, 2)}
+                    onClick={handleButtonClick(handleAddRange)}
+                    className="sm-btn add-btn"
                   >
-                    効率順
+                    追加
+                  </button>
+                  <button
+                    ref={(el) => addToRefs(el, rangeRefs, 3)}
+                    onClick={handleButtonClick(handleRemoveRange)}
+                    className="sm-btn remove-btn"
+                  >
+                    除外
                   </button>
                 </div>
-
-                <div className="history-list-wrapper">
-                  <table className="record-table">
-                    <thead>
-                      <tr>
-                        <th>日時</th>
-                        <th>設定</th>
-                        <th>スコア</th>
-                        <th>効率</th>
-                        <th>タイム</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displayHistory.length === 0 && (
-                        <tr>
-                          <td colSpan="5" className="no-data">
-                            履歴がありません
-                          </td>
-                        </tr>
-                      )}
-                      {displayHistory.map((rec, i) => (
-                        <tr
-                          key={i}
-                          ref={(el) => addToRefsPush(el, historyRowRefs)}
-                          tabIndex="0"
-                          className={rec.isRetired ? "row-retired" : ""}
-                          onClick={() => setViewingHistory(rec)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          <td className="rec-date">
-                            {rec.date.split(" ")[0]}
-                            <br />
-                            {rec.date.split(" ")[1]}
-                          </td>
-                          <td className="rec-mode">
-                            <span className="mode-badge">
-                              {getStyleLabel(rec.style)}
-                            </span>
-                            <br />
-                            <span className="type-badge">
-                              {getModeLabel(rec.mode)}
-                            </span>
-                          </td>
-                          <td className="rec-score">{rec.score}</td>
-                          <td className="rec-pps">
-                            {Math.floor(
-                              rec.score / Math.max(1, parseFloat(rec.time))
-                            )}{" "}
-                            <span style={{ fontSize: "0.7em" }}>points/s</span>
-                          </td>
-                          <td className="rec-time">{rec.time}s</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {viewingHistory && (
-          <div
-            className="modal-overlay"
-            onClick={() => setViewingHistory(null)}
-          >
-            <div
-              className="modal-content history-detail-modal"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h3>プレイ詳細</h3>
-              {viewingHistory.isRetired && (
-                <div className="retired-badge">RETIRED</div>
-              )}
-              <div className="detail-row">
-                <span>日時:</span> <strong>{viewingHistory.date}</strong>
-              </div>
-              <div className="detail-row">
-                <span>モード:</span>{" "}
-                <strong>
-                  {getStyleLabel(viewingHistory.style)} /{" "}
-                  {getModeLabel(viewingHistory.mode)}
-                </strong>
-              </div>
-              <div className="detail-row">
-                <span>スコア:</span>{" "}
-                <strong style={{ color: "#007bff" }}>
-                  {viewingHistory.score}
-                </strong>
-              </div>
-              <div className="detail-row">
-                <span>コンボ:</span> <strong>{viewingHistory.maxCombo}</strong>
-              </div>
-              <div className="detail-row">
-                <span>タイム:</span> <strong>{viewingHistory.time}s</strong>
-              </div>
-              <hr />
-              <h4>
-                出題範囲 (
-                {viewingHistory.selectedNumbers
-                  ? viewingHistory.selectedNumbers.length
-                  : 0}
-                )
-              </h4>
-              <div className="symbol-list">
-                {viewingHistory.selectedNumbers &&
-                  viewingHistory.selectedNumbers.map((num) => (
-                    <span key={num} className="symbol-tag">
-                      {getSymbolByNumber(num)}
-                      <span className="sub-num">{num}</span>
-                    </span>
-                  ))}
-                {(!viewingHistory.selectedNumbers ||
-                  viewingHistory.selectedNumbers.length === 0) && (
-                  <p className="no-data">範囲データなし</p>
-                )}
-              </div>
-              <div className="modal-buttons" style={{ marginTop: "20px" }}>
-                <button
-                  onClick={() => setViewingHistory(null)}
-                  className="modal-no-btn"
-                >
-                  閉じる
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (gameState === "ready")
-    return (
-      <div className="app-container">
-        {" "}
-        <div className="card ready-card">
-          <div className="enter-icon">Press Enter</div>
-          <button onClick={resetGame} className="back-btn">
-            設定に戻る
-          </button>
-        </div>
-      </div>
-    );
-  if (gameState === "playing") {
-    if (!currentElement)
-      return (
-        <div className="app-container">
-          <h1>Loading...</h1>
-        </div>
-      );
-    return (
-      <div className="app-container">
-        {" "}
-        <div className="header-info">
-          {" "}
-          <div style={{ textAlign: "left" }}>
-            <span className="total-timer">{currentTimer}s</span>
-            <span className="question-timer"> ({questionTimer}s)</span>
-          </div>{" "}
-          <div className="header-right">
-            {" "}
-            {playStyle === "infinite" ? (
-              <span
-                className={`question-count ${combo > 1 ? "combo-active" : ""}`}
-              >
-                Score: {score}{" "}
-                <span
-                  className={`combo-badge ${
-                    isComboBreaking ? "combo-break" : ""
-                  }`}
-                >
-                  {combo} COMBO!
-                </span>
-              </span>
-            ) : (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                {combo > 1 && (
-                  <span
-                    className={`combo-badge fade-in ${
-                      isComboBreaking ? "combo-break" : ""
-                    }`}
+                <div className="bulk-actions">
+                  <button
+                    ref={(el) => addToRefs(el, bulkRefs, 0)}
+                    onClick={handleButtonClick(handleSelectAll)}
+                    className="sm-btn"
                   >
-                    {combo} COMBO!
-                  </span>
-                )}
-                <span className="question-count">
-                  残り: {quizQueue.length - currentIndex}問
-                </span>
+                    全選択
+                  </button>
+                  <button
+                    ref={(el) => addToRefs(el, bulkRefs, 1)}
+                    onClick={handleButtonClick(handleClearAll)}
+                    className="sm-btn"
+                  >
+                    全解除
+                  </button>
+                </div>
               </div>
-            )}{" "}
-            <button onClick={handleRetireClick} className="retire-text-btn">
-              {playStyle === "infinite" ? "終了する" : "やめる"}
-            </button>{" "}
-          </div>{" "}
-        </div>{" "}
-        <div className="card" style={{ position: "relative" }}>
-          {" "}
-          {scoreFeedback && (
-            <div
-              className={`score-feedback ${
-                scoreFeedback.type === "gain" ? "fb-gain" : "fb-loss"
-              }`}
+              <div className="menu-tabs">
+                <button
+                  ref={(el) => addToRefs(el, tabRefs, 0)}
+                  className={menuTab === "series" ? "tab-active" : ""}
+                  onClick={handleButtonClick(() => setMenuTab("series"))}
+                >
+                  系列から選ぶ
+                </button>
+                <button
+                  ref={(el) => addToRefs(el, tabRefs, 1)}
+                  className={menuTab === "custom" ? "tab-active" : ""}
+                  onClick={handleButtonClick(() => setMenuTab("custom"))}
+                >
+                  ユーザー定義範囲
+                </button>
+              </div>
+              <div className="slide-wrapper">
+                <div
+                  className={`slide-container ${menuTab === "custom" ? "slide-left" : ""
+                    }`}
+                >
+                  <div className="slide-page">
+                    <div className="series-legend">
+                      {SERIES_LEGEND.map((s) => (
+                        <button
+                          key={s.id}
+                          ref={(el) => addToRefsPush(el, seriesRefs)}
+                          className="legend-btn"
+                          style={{ backgroundColor: s.color }}
+                          onClick={handleButtonClick(() =>
+                            toggleSeries(s.id)
+                          )}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="slide-page">
+                    <div className="save-group-section">
+                      <input
+                        ref={(el) => addToRefs(el, saveRefs, 0)}
+                        type="text"
+                        placeholder="名前をつけて保存"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        className="save-input"
+                        onFocus={() => setIsEditingInput(false)}
+                        onBlur={() => setIsEditingInput(false)}
+                      />
+                      <button
+                        ref={(el) => addToRefs(el, saveRefs, 1)}
+                        onClick={handleButtonClick(saveCustomGroup)}
+                        className="sm-btn save-btn"
+                      >
+                        保存
+                      </button>
+                    </div>
+                    <div className="custom-groups-list">
+                      {customGroups.map((g) => (
+                        <div key={g.id} className="custom-group-item">
+                          <button
+                            ref={(el) => addToRefsPush(el, customRefs)}
+                            className="legend-btn custom-btn"
+                            onClick={handleButtonClick(() =>
+                              toggleCustomGroup(g)
+                            )}
+                          >
+                            {g.label} ({g.numbers.length})
+                          </button>
+                          <span
+                            className="delete-icon"
+                            onClick={(e) => deleteCustomGroup(g.id, e)}
+                          >
+                            ×
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="periodic-table-wrapper">
+                <div className="periodic-table-grid">
+                  {Array.from({ length: 18 }, (_, i) => i + 1).map((g) => (
+                    <div
+                      key={`g-${g}`}
+                      className="group-header"
+                      style={{ gridColumn: g + 1, gridRow: 1 }}
+                      onClick={() => toggleGroupColumn(g)}
+                    >
+                      {g}
+                    </div>
+                  ))}
+                  {Array.from({ length: 7 }, (_, i) => i + 1).map((p) => (
+                    <div
+                      key={`p-${p}`}
+                      className="period-header"
+                      style={{ gridColumn: 1, gridRow: p + 1 }}
+                      onClick={() => togglePeriod(p)}
+                    >
+                      {p}
+                    </div>
+                  ))}
+                  {elementsData.map((el) => {
+                    let isSelected = false;
+                    if (el.isPlaceholder) {
+                      const targetSeries = el.targetGroup;
+                      const targetElements = elementsData
+                        .filter(
+                          (e) =>
+                            e.group === targetSeries && !e.isPlaceholder
+                        )
+                        .map((e) => e.number);
+                      isSelected = targetElements.every((n) =>
+                        selectedNumbers.includes(n)
+                      );
+                    } else {
+                      isSelected = selectedNumbers.includes(el.number);
+                    }
+                    return (
+                      <div
+                        key={el.number || el.label}
+                        className={`element-cell ${isSelected ? "selected" : ""
+                          }`}
+                        style={{
+                          gridColumn: el.displayGroup + 1,
+                          gridRow: el.displayPeriod + 1,
+                          backgroundColor: isSelected
+                            ? getElementColor(el)
+                            : "#f0f0f0",
+                          opacity: isSelected ? 1 : 0.4,
+                        }}
+                        onClick={() => toggleElement(el)}
+                        title={el.name}
+                      >
+                        <div className="cell-num">{el.number}</div>
+                        <div className="cell-sym">{el.symbol}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+            <button
+              ref={startBtnRef}
+              onClick={handleButtonClick(startGame)}
+              className="start-btn"
             >
-              {scoreFeedback.val}
-            </div>
-          )}{" "}
-          <p className="question-label">
-            {isSkipping ? (
-              <span className="answer-label">正解は...</span>
-            ) : currentQType === "nameToNum" ? (
-              "原子番号は？"
-            ) : (
-              "元素記号は？"
-            )}
-          </p>{" "}
-          <div className="element-display">
-            {currentQType === "nameToNum" ? (
-              <>
-                <h2>{currentElement.name}</h2>
-                <p className="element-symbol">({currentElement.symbol})</p>
-              </>
-            ) : (
-              <>
-                <h2>{currentElement.number}</h2>
-                <p className="element-symbol">(原子番号)</p>
-              </>
-            )}
-          </div>{" "}
-          <form onSubmit={handleCheck} className="quiz-form">
-            {" "}
-            <div className="input-group">
-              <input
-                ref={inputRef}
-                type={currentQType === "nameToNum" ? "number" : "text"}
-                value={userGuess}
-                onChange={(e) => setUserGuess(e.target.value)}
-                placeholder={currentQType === "nameToNum" ? "番号" : "記号"}
-                autoFocus
-                className={`number-input ${isSkipping ? "input-reveal" : ""}`}
-                autoComplete="off"
-                disabled={isSkipping || showRetireConfirm}
-              />
-            </div>{" "}
-            <div className="hint-area">
-              {emptyEnterCount > 0 && !isSkipping && (
-                <p key={emptyEnterCount} className="skip-hint">
-                  Enterあと {3 - emptyEnterCount} 回でスキップ
-                </p>
-              )}
-            </div>{" "}
-            <div className="button-group">
-              <button
-                type="submit"
-                className="check-btn"
-                disabled={isSkipping || showRetireConfirm}
-              >
-                回答
-              </button>
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="skip-btn"
-                disabled={isSkipping || showRetireConfirm}
-              >
-                わからない
-              </button>
-            </div>{" "}
-          </form>{" "}
-          {isError && !isSkipping && <p className="message error">不正解！</p>}{" "}
-        </div>{" "}
-        {showRetireConfirm && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>終了しますか？</h3>
-              <p>ここまでの成績で結果を表示します。</p>
-              <div className="modal-buttons">
-                <button
-                  onClick={cancelRetire}
-                  className={`modal-no-btn ${
-                    modalSelection === "cancel" ? "focused" : ""
-                  }`}
-                >
-                  続ける
-                </button>
-                <button
-                  onClick={retryFromModal}
-                  className={`modal-retry-btn ${
-                    modalSelection === "retry" ? "focused" : ""
-                  }`}
-                >
-                  最初から
-                </button>
-                <button
-                  onClick={confirmRetire}
-                  className={`modal-yes-btn ${
-                    modalSelection === "confirm" ? "focused" : ""
-                  }`}
-                >
-                  終了する
-                </button>
-              </div>
-            </div>
+              スタート
+            </button>
           </div>
-        )}{" "}
-      </div>
-    );
-  }
-  if (gameState === "finished") {
-    const totalTimeNum = history.reduce((acc, cur) => acc + cur.timeTaken, 0);
-    const avgNum = history.length > 0 ? totalTimeNum / history.length : 0;
-    const scoreText = history.length > 0 ? "RESULT" : "NO DATA";
-    const MAX_DIFF_SCALE = 3.0;
-    const pps = (score / Math.max(1, totalTimeNum)).toFixed(2);
-    return (
-      <div className="app-container">
-        {" "}
-        <h1>結果発表</h1>{" "}
-        <div className="card result-card">
-          {" "}
-          <h2 className="success-text">{scoreText}</h2>{" "}
-          {newRecordFlags.score && (
-            <div
-              style={{
-                color: "gold",
-                fontWeight: "bold",
-                fontSize: "1.2rem",
-                marginBottom: "10px",
-              }}
-            >
-              ★ New High Score! ★
-            </div>
-          )}{" "}
-          {newRecordFlags.time && !newRecordFlags.score && (
-            <div
-              style={{
-                color: "gold",
-                fontWeight: "bold",
-                fontSize: "1.2rem",
-                marginBottom: "10px",
-              }}
-            >
-              ★ New Best Time! ★
-            </div>
-          )}{" "}
-          <div className="score-summary">
-            {" "}
-            <div
-              className={`score-group-column ${
-                newRecordFlags.score ? "popHighlight" : ""
-              }`}
-            >
-              <div className="score-label-main">Score Info</div>
-              <div className="score-row">
-                <div className="score-item">
-                  <span className="label">Score</span>
-                  <span className="value">{score}</span>
-                </div>
-                <div className="score-item">
-                  <span className="label">Max Combo</span>
-                  <span className="value">{maxCombo}</span>
-                </div>
-                <div className="score-item">
-                  <span className="label">Points/s</span>
-                  <span className="value">{pps}</span>
-                </div>
+        </div>
+
+        <div className="menu-slide">
+          <div className="card menu-card history-card">
+            <h2 style={{ marginBottom: "15px" }}>クリア履歴</h2>
+            <div className="filter-controls">
+              <div className="filter-group">
+                <label>モード:</label>
+                <select
+                  ref={(el) => addToRefs(el, historyFilterStyleRefs, 0)}
+                  value={historyFilterStyle}
+                  onChange={(e) => setHistoryFilterStyle(e.target.value)}
+                >
+                  <option value="all">すべて</option>
+                  <option value="standard">クラシック</option>
+                  <option value="infinite">エンドレス</option>
+                </select>
               </div>
-            </div>{" "}
-            <div className="score-divider"></div>{" "}
-            <div
-              className={`score-group-column ${
-                newRecordFlags.time ? "popHighlight" : ""
-              }`}
-            >
-              <div className="score-label-main">Time Info</div>
-              <div className="score-row">
-                <div className="score-item">
-                  <span className="label">Total Time</span>
-                  <span className="value">{totalTimeNum.toFixed(1)}s</span>
-                </div>
-                <div className="score-item">
-                  <span className="label">Avg Time</span>
-                  <span className="value">{avgNum.toFixed(2)}s</span>
-                </div>
-              </div>
-            </div>{" "}
-          </div>{" "}
-          {currentSettingsBest && (
-            <div className="best-score-container">
-              <div className="best-label">Best Record</div>
-              <div className="best-values">
-                <span>
-                  Score: <strong>{currentSettingsBest.score}</strong>
-                </span>
-                <span>
-                  Combo: <strong>{currentSettingsBest.maxCombo}</strong>
-                </span>
-                <span>
-                  Time: <strong>{currentSettingsBest.time || "-"}s</strong>
-                </span>
+              <div className="filter-group">
+                <label>形式:</label>
+                <select
+                  ref={(el) => addToRefs(el, historyFilterModeRefs, 0)}
+                  value={historyFilterMode}
+                  onChange={(e) => setHistoryFilterMode(e.target.value)}
+                >
+                  <option value="all">すべて</option>
+                  <option value="nameToNum">名前→番号</option>
+                  <option value="numToSym">番号→記号</option>
+                  <option value="shuffle">シャッフル</option>
+                </select>
               </div>
             </div>
-          )}{" "}
-          <div className="result-actions">
-            <button
-              onClick={retryFromResult}
-              className={`retry-btn ${
-                resultSelection === "retry" ? "focused" : ""
-              }`}
-            >
-              同じ設定で再挑戦
-            </button>
-            <button
-              onClick={resetGame}
-              className={`back-btn ${
-                resultSelection === "menu" ? "focused" : ""
-              }`}
-            >
-              設定に戻る
-            </button>
-          </div>{" "}
-          <div className="history-section">
-            <h3>回答履歴 ({history.length}問)</h3>
-            <div className="history-table-container">
-              <table className="history-table">
+
+            <div className="sort-tabs">
+              <button
+                ref={(el) => addToRefs(el, historySortRefs, 0)}
+                className={historySort === "date" ? "sort-active" : ""}
+                onClick={handleButtonClick(() => setHistorySort("date"))}
+              >
+                日付順
+              </button>
+              <button
+                ref={(el) => addToRefs(el, historySortRefs, 1)}
+                className={historySort === "score" ? "sort-active" : ""}
+                onClick={handleButtonClick(() => setHistorySort("score"))}
+              >
+                スコア順
+              </button>
+              <button
+                ref={(el) => addToRefs(el, historySortRefs, 2)}
+                className={
+                  historySort === "efficiency" ? "sort-active" : ""
+                }
+                onClick={handleButtonClick(() =>
+                  setHistorySort("efficiency")
+                )}
+              >
+                効率順
+              </button>
+            </div>
+
+            <div className="history-list-wrapper">
+              <table className="record-table">
                 <thead>
                   <tr>
-                    <th className="th-problem">問題と正解</th>
-                    <th className="th-time">タイム/スコア</th>
-                    <th className="th-chart">平均との差</th>
+                    <th>日時</th>
+                    <th>設定</th>
+                    <th>スコア</th>
+                    <th>効率</th>
+                    <th>タイム</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {history.map((item, index) => {
-                    const diff = item.timeTaken - avgNum;
-                    const absDiff = Math.abs(diff);
-                    const barWidth = (absDiff / MAX_DIFF_SCALE) * 50;
-                    let diffClass = "diff-normal";
-                    let barColorClass = "bar-normal";
-                    if (item.isSkipped) {
-                      diffClass = "diff-skipped";
-                      barColorClass = "bar-skipped";
-                    } else if (diff > 0) {
-                      diffClass = "diff-slower";
-                      barColorClass = "bar-slower";
-                    } else {
-                      diffClass = "diff-faster";
-                      barColorClass = "bar-faster";
-                    }
-                    const qType = item.element.questionType || "nameToNum";
-                    let qText, aMain;
-                    if (qType === "nameToNum") {
-                      qText = item.element.name;
-                      aMain = item.element.number;
-                    } else {
-                      qText = item.element.number;
-                      aMain = item.element.name;
-                    }
-                    const scoreDisplay =
-                      item.scoreDelta > 0
-                        ? `+${item.scoreDelta}`
-                        : item.scoreDelta;
-                    return (
-                      <tr
-                        key={index}
-                        className={
-                          item.isSkipped
-                            ? "row-skipped"
-                            : wrongItems.some(
-                                (w) => w.number === item.element.number
-                              )
-                            ? "row-wrong"
-                            : ""
-                        }
-                      >
-                        {" "}
-                        <td className="col-name">
-                          {" "}
-                          <div className="history-flex-row">
-                            {" "}
-                            <span className="history-q">{qText}</span>{" "}
-                            <span className="history-arrow">→</span>{" "}
-                            <span className="history-a">
-                              {" "}
-                              <span className="history-a-main">
-                                {aMain}
-                              </span>{" "}
-                              <span className="history-a-sub">
-                                ({item.element.symbol})
-                              </span>{" "}
-                            </span>{" "}
-                            <div className="history-badges">
-                              {" "}
-                              {item.isSkipped && (
-                                <span className="badge-skip">SKIP</span>
-                              )}{" "}
-                              {!item.isSkipped &&
-                                wrongItems.some(
-                                  (w) => w.number === item.element.number
-                                ) && (
-                                  <span className="badge-wrong">MISS</span>
-                                )}{" "}
-                            </div>{" "}
-                          </div>{" "}
-                        </td>{" "}
-                        <td className="col-time">
-                          {" "}
-                          <div>{item.timeTaken.toFixed(2)}s</div>{" "}
-                          <div
-                            className={`history-score ${
-                              item.scoreDelta > 0 ? "score-plus" : "score-zero"
-                            }`}
-                          >
-                            {scoreDisplay}
-                          </div>{" "}
-                        </td>{" "}
-                        <td className="col-chart">
-                          {" "}
-                          <div className="chart-wrapper">
-                            {" "}
-                            <div className="chart-center-line"></div>{" "}
-                            <div
-                              className={`chart-bar ${barColorClass}`}
-                              style={{
-                                width: `${barWidth}%`,
-                                left:
-                                  diff < 0 ? `calc(50% - ${barWidth}%)` : "50%",
-                              }}
-                            ></div>{" "}
-                            <span
-                              className={`chart-label ${
-                                diff < 0 ? "label-left" : "label-right"
-                              } ${diffClass}`}
-                            >
-                              {" "}
-                              {diff > 0 ? "+" : ""}
-                              {diff.toFixed(2)}{" "}
-                            </span>{" "}
-                          </div>{" "}
-                        </td>{" "}
-                      </tr>
-                    );
-                  })}
+                  {displayHistory.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="no-data">
+                        履歴がありません
+                      </td>
+                    </tr>
+                  )}
+                  {displayHistory.map((rec, i) => (
+                    <tr
+                      key={i}
+                      ref={(el) => addToRefsPush(el, historyRowRefs)}
+                      tabIndex="0"
+                      className={rec.isRetired ? "row-retired" : ""}
+                      onClick={() => setViewingHistory(rec)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <td className="rec-date">
+                        {rec.date.split(" ")[0]}
+                        <br />
+                        {rec.date.split(" ")[1]}
+                      </td>
+                      <td className="rec-mode">
+                        <span className="mode-badge">
+                          {getStyleLabel(rec.style)}
+                        </span>
+                        <br />
+                        <span className="type-badge">
+                          {getModeLabel(rec.mode)}
+                        </span>
+                      </td>
+                      <td className="rec-score">{rec.score}</td>
+                      <td className="rec-pps">
+                        {Math.floor(
+                          rec.score / Math.max(1, parseFloat(rec.time))
+                        )}{" "}
+                        <span style={{ fontSize: "0.7em" }}>points/s</span>
+                      </td>
+                      <td className="rec-time">{rec.time}s</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
-          </div>{" "}
-        </div>{" "}
+          </div>
+        </div>
+      </div>
+        </div >
+
+      { viewingHistory && (
+        <div
+          className="modal-overlay"
+          onClick={() => setViewingHistory(null)}
+        >
+          <div
+            className="modal-content history-detail-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3>プレイ詳細</h3>
+            {viewingHistory.isRetired && (
+              <div className="retired-badge">RETIRED</div>
+            )}
+            <div className="detail-row">
+              <span>日時:</span> <strong>{viewingHistory.date}</strong>
+            </div>
+            <div className="detail-row">
+              <span>モード:</span>{" "}
+              <strong>
+                {getStyleLabel(viewingHistory.style)} /{" "}
+                {getModeLabel(viewingHistory.mode)}
+              </strong>
+            </div>
+            <div className="detail-row">
+              <span>スコア:</span>{" "}
+              <strong style={{ color: "#007bff" }}>
+                {viewingHistory.score}
+              </strong>
+            </div>
+            <div className="detail-row">
+              <span>コンボ:</span> <strong>{viewingHistory.maxCombo}</strong>
+            </div>
+            <div className="detail-row">
+              <span>タイム:</span> <strong>{viewingHistory.time}s</strong>
+            </div>
+            <hr />
+            <h4>
+              出題範囲 (
+              {viewingHistory.selectedNumbers
+                ? viewingHistory.selectedNumbers.length
+                : 0}
+              )
+            </h4>
+            <div className="symbol-list">
+              {viewingHistory.selectedNumbers &&
+                viewingHistory.selectedNumbers.map((num) => (
+                  <span key={num} className="symbol-tag">
+                    {getSymbolByNumber(num)}
+                    <span className="sub-num">{num}</span>
+                  </span>
+                ))}
+              {(!viewingHistory.selectedNumbers ||
+                viewingHistory.selectedNumbers.length === 0) && (
+                  <p className="no-data">範囲データなし</p>
+                )}
+            </div>
+            <div className="modal-buttons" style={{ marginTop: "20px" }}>
+              <button
+                onClick={() => setViewingHistory(null)}
+                className="modal-no-btn"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+  }
+      </div >
+    );
+}
+
+if (gameState === "loading") {
+  return (
+    <div className="app-container">
+      <div className="card loading-card">
+        <h2>Loading...</h2>
+        <div className="loader"></div>
+      </div>
+    </div>
+  );
+}
+
+// Fallback for ready state removal
+if (gameState === "ready") return null;
+
+if (gameState === "playing") {
+  if (!currentElement)
+    return (
+      <div className="app-container">
+        <h1>Loading...</h1>
       </div>
     );
-  }
+  return (
+    <div className="app-container">
+      {" "}
+      <div className="header-info">
+        {" "}
+        <div style={{ textAlign: "left" }}>
+          <span className="total-timer">{currentTimer}s</span>
+          <span className="question-timer"> ({questionTimer}s)</span>
+        </div>{" "}
+        <div className="header-right">
+          {" "}
+          {playStyle === "infinite" ? (
+            <span
+              className={`question-count ${combo > 1 ? "combo-active" : ""}`}
+            >
+              Score: {score}{" "}
+              <span
+                className={`combo-badge ${isComboBreaking ? "combo-break" : ""
+                  }`}
+              >
+                {combo} COMBO!
+              </span>
+            </span>
+          ) : (
+            <div
+              style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            >
+              {combo > 1 && (
+                <span
+                  className={`combo-badge fade-in ${isComboBreaking ? "combo-break" : ""
+                    }`}
+                >
+                  {combo} COMBO!
+                </span>
+              )}
+              <span className="question-count">
+                残り: {quizQueue.length - currentIndex}問
+              </span>
+            </div>
+          )}{" "}
+          <button onClick={handleRetireClick} className="retire-text-btn">
+            {playStyle === "infinite" ? "終了する" : "やめる"}
+          </button>{" "}
+        </div>{" "}
+      </div>{" "}
+      <div className="card" style={{ position: "relative" }}>
+        {" "}
+        {scoreFeedback && (
+          <div
+            className={`score-feedback ${scoreFeedback.type === "gain" ? "fb-gain" : "fb-loss"
+              }`}
+          >
+            {scoreFeedback.val}
+          </div>
+        )}{" "}
+        <p className="question-label">
+          {isSkipping ? (
+            <span className="answer-label">正解は...</span>
+          ) : currentQType === "nameToNum" ? (
+            "原子番号は？"
+          ) : (
+            "元素記号は？"
+          )}
+        </p>{" "}
+        <div className="element-display">
+          {currentQType === "nameToNum" ? (
+            <>
+              <h2>{currentElement.name}</h2>
+              <p className="element-symbol">({currentElement.symbol})</p>
+            </>
+          ) : (
+            <>
+              <h2>{currentElement.number}</h2>
+              <p className="element-symbol">(原子番号)</p>
+            </>
+          )}
+        </div>{" "}
+        <form onSubmit={handleCheck} className="quiz-form">
+          {" "}
+          <div className="input-group">
+            <input
+              ref={inputRef}
+              type={currentQType === "nameToNum" ? "number" : "text"}
+              value={userGuess}
+              onChange={(e) => setUserGuess(e.target.value)}
+              placeholder={currentQType === "nameToNum" ? "番号" : "記号"}
+              autoFocus
+              className={`number-input ${isSkipping ? "input-reveal" : ""}`}
+              autoComplete="off"
+              disabled={isSkipping || showRetireConfirm}
+            />
+          </div>{" "}
+          <div className="hint-area">
+            {emptyEnterCount > 0 && !isSkipping && (
+              <p key={emptyEnterCount} className="skip-hint">
+                Enterあと {3 - emptyEnterCount} 回でスキップ
+              </p>
+            )}
+          </div>{" "}
+          <div className="button-group">
+            <button
+              type="submit"
+              className="check-btn"
+              disabled={isSkipping || showRetireConfirm}
+            >
+              回答
+            </button>
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="skip-btn"
+              disabled={isSkipping || showRetireConfirm}
+            >
+              わからない
+            </button>
+          </div>{" "}
+        </form>{" "}
+        {isError && !isSkipping && <p className="message error">不正解！</p>}{" "}
+        <TouchKeyboard
+          mode={currentQType === "nameToNum" ? "number" : "text"}
+          onInput={handleKeyboardInput}
+          onDelete={handleKeyboardDelete}
+          onEnter={handleKeyboardEnter}
+          disabled={isSkipping || showRetireConfirm}
+        />
+      </div>{" "}
+      {showRetireConfirm && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>終了しますか？</h3>
+            <p>ここまでの成績で結果を表示します。</p>
+            <div className="modal-buttons">
+              <button
+                onClick={cancelRetire}
+                className={`modal-no-btn ${modalSelection === "cancel" ? "focused" : ""
+                  }`}
+              >
+                続ける
+              </button>
+              <button
+                onClick={retryFromModal}
+                className={`modal-retry-btn ${modalSelection === "retry" ? "focused" : ""
+                  }`}
+              >
+                最初から
+              </button>
+              <button
+                onClick={confirmRetire}
+                className={`modal-yes-btn ${modalSelection === "confirm" ? "focused" : ""
+                  }`}
+              >
+                終了する
+              </button>
+            </div>
+          </div>
+        </div>
+      )}{" "}
+    </div>
+  );
+}
+if (gameState === "finished") {
+  const totalTimeNum = history.reduce((acc, cur) => acc + cur.timeTaken, 0);
+  const avgNum = history.length > 0 ? totalTimeNum / history.length : 0;
+  const scoreText = history.length > 0 ? "RESULT" : "NO DATA";
+  const MAX_DIFF_SCALE = 3.0;
+  const pps = (score / Math.max(1, totalTimeNum)).toFixed(2);
+  return (
+    <div className="app-container">
+      {" "}
+      <h1>結果発表</h1>{" "}
+      <div className="card result-card">
+        {" "}
+        <h2 className="success-text">{scoreText}</h2>{" "}
+        {newRecordFlags.score && (
+          <div
+            style={{
+              color: "gold",
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              marginBottom: "10px",
+            }}
+          >
+            ★ New High Score! ★
+          </div>
+        )}{" "}
+        {newRecordFlags.time && !newRecordFlags.score && (
+          <div
+            style={{
+              color: "gold",
+              fontWeight: "bold",
+              fontSize: "1.2rem",
+              marginBottom: "10px",
+            }}
+          >
+            ★ New Best Time! ★
+          </div>
+        )}{" "}
+        <div className="score-summary">
+          {" "}
+          <div
+            className={`score-group-column ${newRecordFlags.score ? "popHighlight" : ""
+              }`}
+          >
+            <div className="score-label-main">Score Info</div>
+            <div className="score-row">
+              <div className="score-item">
+                <span className="label">Score</span>
+                <span className="value">{score}</span>
+              </div>
+              <div className="score-item">
+                <span className="label">Max Combo</span>
+                <span className="value">{maxCombo}</span>
+              </div>
+              <div className="score-item">
+                <span className="label">Points/s</span>
+                <span className="value">{pps}</span>
+              </div>
+            </div>
+          </div>{" "}
+          <div className="score-divider"></div>{" "}
+          <div
+            className={`score-group-column ${newRecordFlags.time ? "popHighlight" : ""
+              }`}
+          >
+            <div className="score-label-main">Time Info</div>
+            <div className="score-row">
+              <div className="score-item">
+                <span className="label">Total Time</span>
+                <span className="value">{totalTimeNum.toFixed(1)}s</span>
+              </div>
+              <div className="score-item">
+                <span className="label">Avg Time</span>
+                <span className="value">{avgNum.toFixed(2)}s</span>
+              </div>
+            </div>
+          </div>{" "}
+        </div>{" "}
+        {currentSettingsBest && (
+          <div className="best-score-container">
+            <div className="best-label">Best Record</div>
+            <div className="best-values">
+              <span>
+                Score: <strong>{currentSettingsBest.score}</strong>
+              </span>
+              <span>
+                Combo: <strong>{currentSettingsBest.maxCombo}</strong>
+              </span>
+              <span>
+                Time: <strong>{currentSettingsBest.time || "-"}s</strong>
+              </span>
+            </div>
+          </div>
+        )}{" "}
+        <div className="result-actions">
+          <button
+            onClick={retryFromResult}
+            className={`retry-btn ${resultSelection === "retry" ? "focused" : ""
+              }`}
+          >
+            同じ設定で再挑戦
+          </button>
+          <button
+            onClick={resetGame}
+            className={`back-btn ${resultSelection === "menu" ? "focused" : ""
+              }`}
+          >
+            設定に戻る
+          </button>
+        </div>{" "}
+        <div className="history-section">
+          <h3>回答履歴 ({history.length}問)</h3>
+          <div className="history-table-container">
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th className="th-problem">問題と正解</th>
+                  <th className="th-time">タイム/スコア</th>
+                  <th className="th-chart">平均との差</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.map((item, index) => {
+                  const diff = item.timeTaken - avgNum;
+                  const absDiff = Math.abs(diff);
+                  const barWidth = (absDiff / MAX_DIFF_SCALE) * 50;
+                  let diffClass = "diff-normal";
+                  let barColorClass = "bar-normal";
+                  if (item.isSkipped) {
+                    diffClass = "diff-skipped";
+                    barColorClass = "bar-skipped";
+                  } else if (diff > 0) {
+                    diffClass = "diff-slower";
+                    barColorClass = "bar-slower";
+                  } else {
+                    diffClass = "diff-faster";
+                    barColorClass = "bar-faster";
+                  }
+                  const qType = item.element.questionType || "nameToNum";
+                  let qText, aMain;
+                  if (qType === "nameToNum") {
+                    qText = item.element.name;
+                    aMain = item.element.number;
+                  } else {
+                    qText = item.element.number;
+                    aMain = item.element.name;
+                  }
+                  const scoreDisplay =
+                    item.scoreDelta > 0
+                      ? `+${item.scoreDelta}`
+                      : item.scoreDelta;
+                  return (
+                    <tr
+                      key={index}
+                      className={
+                        item.isSkipped
+                          ? "row-skipped"
+                          : wrongItems.some(
+                            (w) => w.number === item.element.number
+                          )
+                            ? "row-wrong"
+                            : ""
+                      }
+                    >
+                      {" "}
+                      <td className="col-name">
+                        {" "}
+                        <div className="history-flex-row">
+                          {" "}
+                          <span className="history-q">{qText}</span>{" "}
+                          <span className="history-arrow">→</span>{" "}
+                          <span className="history-a">
+                            {" "}
+                            <span className="history-a-main">
+                              {aMain}
+                            </span>{" "}
+                            <span className="history-a-sub">
+                              ({item.element.symbol})
+                            </span>{" "}
+                          </span>{" "}
+                          <div className="history-badges">
+                            {" "}
+                            {item.isSkipped && (
+                              <span className="badge-skip">SKIP</span>
+                            )}{" "}
+                            {!item.isSkipped &&
+                              wrongItems.some(
+                                (w) => w.number === item.element.number
+                              ) && (
+                                <span className="badge-wrong">MISS</span>
+                              )}{" "}
+                          </div>{" "}
+                        </div>{" "}
+                      </td>{" "}
+                      <td className="col-time">
+                        {" "}
+                        <div>{item.timeTaken.toFixed(2)}s</div>{" "}
+                        <div
+                          className={`history-score ${item.scoreDelta > 0 ? "score-plus" : "score-zero"
+                            }`}
+                        >
+                          {scoreDisplay}
+                        </div>{" "}
+                      </td>{" "}
+                      <td className="col-chart">
+                        {" "}
+                        <div className="chart-wrapper">
+                          {" "}
+                          <div className="chart-center-line"></div>{" "}
+                          <div
+                            className={`chart-bar ${barColorClass}`}
+                            style={{
+                              width: `${barWidth}%`,
+                              left:
+                                diff < 0 ? `calc(50% - ${barWidth}%)` : "50%",
+                            }}
+                          ></div>{" "}
+                          <span
+                            className={`chart-label ${diff < 0 ? "label-left" : "label-right"
+                              } ${diffClass}`}
+                          >
+                            {" "}
+                            {diff > 0 ? "+" : ""}
+                            {diff.toFixed(2)}{" "}
+                          </span>{" "}
+                        </div>{" "}
+                      </td>{" "}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>{" "}
+      </div>{" "}
+    </div>
+  );
+}
 }
 
 export default App;

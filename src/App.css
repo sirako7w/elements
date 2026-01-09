@@ -1739,3 +1739,305 @@ select:focus {
     transform: translateX(0);
   }
 }
+
+/* --- Touch Keyboard --- */
+.touch-keyboard {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background-color: #f0f2f5;
+  border-radius: 12px;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.kb-key {
+  padding: 12px 0;
+  min-width: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  max-width: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kb-key:active {
+  background-color: #e5e7eb;
+  transform: translateY(1px);
+}
+
+.kb-key:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.kb-special {
+  background-color: #e6f2ff;
+  color: #007bff;
+  font-size: 0.9rem;
+}
+
+.kb-backspace {
+  background-color: #ffe6e6;
+  color: #d9534f;
+  flex: 1.5;
+  font-size: 0.9rem;
+}
+
+.kb-enter {
+  background-color: #28a745;
+  color: #fff;
+  flex: 1.5;
+  font-size: 0.9rem;
+}
+
+.touch-keyboard.numeric {
+  max-width: 320px;
+  margin: 15px auto 0;
+}
+
+.touch-keyboard.qwerty {
+  max-width: 100%;
+}
+
+.touch-keyboard.qwerty .kb-key {
+  padding: 10px 0;
+  font-size: 1rem;
+  min-width: 28px;
+}
+
+.kb-key.placeholder {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* --- Mobile Adjustments --- */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 10px 8px;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+
+  .card {
+    padding: 15px 12px;
+    margin-bottom: 15px;
+    border-radius: 16px;
+  }
+
+  .periodic-table-wrapper {
+    padding: 5px 0;
+  }
+
+  .periodic-table-grid {
+    min-width: 100%;
+    /* Changed from fixed width to % */
+    transform-origin: top left;
+    /* Prepare for scale if needed */
+  }
+
+  .element-display h2 {
+    font-size: 2.5rem;
+    margin: 10px 0;
+  }
+
+  .question-label {
+    font-size: 1rem;
+  }
+
+  .number-input {
+    font-size: 1.5rem;
+    padding: 8px;
+  }
+
+  .button-group {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .check-btn,
+  .skip-btn {
+    flex: 1;
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .score-summary {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .score-divider {
+    width: 100%;
+    height: 1px;
+    margin: 5px 0;
+  }
+
+  .score-group-column {
+    width: 100%;
+  }
+
+  .score-row {
+    justify-content: space-around;
+  }
+
+  .history-table th,
+  .history-table td {
+    padding: 6px 4px;
+    font-size: 0.8rem;
+  }
+
+  .history-q,
+  .history-a-main {
+    font-size: 0.9rem;
+  }
+
+  /* Additional mobile fixes */
+  .manual-range-input {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .slide-container {
+    width: 200%;
+    /* Keep as is */
+  }
+
+  .menu-tabs button {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+  }
+}
+
+/* --- Loading Screen --- */
+.loading-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  min-height: 200px;
+}
+
+.loader {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-top: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- Collapsible Settings (Mobile) --- */
+.settings-toggle-btn {
+  display: none;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-weight: bold;
+  color: #555;
+  cursor: pointer;
+}
+
+.table-selection-section {
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out, margin 0.3s ease;
+  overflow: hidden;
+}
+
+.table-selection-section.open {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.table-selection-section.closed {
+  /* Desktop default is open */
+}
+
+@media (max-width: 600px) {
+  .settings-toggle-btn {
+    display: block;
+  }
+
+  .table-selection-section.closed {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .periodic-table-grid {
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .element-cell {
+    width: auto;
+    height: auto;
+    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: 1px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 0.5px solid #ccc;
+  }
+
+  .cell-num {
+    font-size: 0.5rem;
+    line-height: 1;
+    margin-bottom: 0px;
+  }
+
+  .cell-sym {
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
+  .group-header,
+  .period-header {
+    font-size: 0.6rem;
+    padding: 0;
+    display: none;
+    /* Hide headers on mobile as per new style? Or keep small? User said "fit width". Headers might take space. Let's hide them or keep them tiny. Keeping them tiny 0.6rem. */
+  }
+}
